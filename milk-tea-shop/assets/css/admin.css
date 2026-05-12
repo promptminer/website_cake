@@ -1,0 +1,1921 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:#f5f5f5;
+    color:#111;
+}
+
+/* =========================
+   LAYOUT
+========================= */
+
+.admin-layout{
+    display:flex;
+    min-height:100vh;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar{
+    width:260px;
+    background:#111;
+    color:#fff;
+    padding:20px;
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    overflow-y:auto;
+}
+
+.logo{
+    font-size:24px;
+    font-weight:bold;
+    margin-bottom:30px;
+    text-align:center;
+    letter-spacing:1px;
+}
+
+.menu{
+    list-style:none;
+}
+
+.menu li{
+    margin-bottom:10px;
+}
+
+.menu a{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    padding:14px 16px;
+
+    color:#fff;
+    text-decoration:none;
+
+    border-radius:10px;
+
+    transition:0.2s;
+}
+
+.menu a:hover{
+    background:#222;
+}
+
+.menu a.active{
+    background:#fff;
+    color:#111;
+    font-weight:bold;
+}
+
+/* =========================
+   CONTENT
+========================= */
+
+.content{
+    flex:1;
+    margin-left:260px;
+    padding:25px;
+}
+
+/* =========================
+   PAGE TITLE
+========================= */
+
+.content h1{
+    font-size:28px;
+    margin-bottom:20px;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:16px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom:20px;
+}
+
+/* =========================
+   FORM
+========================= */
+
+.form{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.form input,
+.form select,
+.form textarea{
+    width:100%;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    outline:none;
+}
+
+.form textarea{
+    resize:none;
+    min-height:120px;
+}
+
+.form button{
+    border:none;
+    padding:12px 20px;
+    background:#111;
+    color:#fff;
+    border-radius:10px;
+    cursor:pointer;
+    white-space:nowrap;
+}
+
+.form button:hover{
+    opacity:0.9;
+}
+
+/* =========================
+   ALERT
+========================= */
+
+.alert{
+    padding:14px;
+    border-radius:10px;
+    margin-bottom:20px;
+    font-size:14px;
+}
+
+.alert.success{
+    background:#d4edda;
+    color:#155724;
+}
+
+.alert.error{
+    background:#f8d7da;
+    color:#721c24;
+}
+
+/* =========================
+   TABLE
+========================= */
+
+.table-wrapper{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+    border-radius:14px;
+    overflow:hidden;
+}
+
+table th{
+    background:#111;
+    color:#fff;
+    padding:14px;
+    text-align:left;
+    font-size:14px;
+}
+
+table td{
+    padding:14px;
+    border-bottom:1px solid #eee;
+    font-size:14px;
+}
+
+table tr:hover{
+    background:#fafafa;
+}
+
+/* =========================
+   BUTTON ACTION
+========================= */
+
+.btn{
+    display:inline-block;
+    padding:8px 14px;
+    border-radius:8px;
+    text-decoration:none;
+    font-size:14px;
+}
+
+.btn-edit{
+    background:#111;
+    color:#fff;
+}
+
+.btn-delete{
+    background:#dc3545;
+    color:#fff;
+}
+
+/* =========================
+   DASHBOARD
+========================= */
+
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+}
+
+.dashboard-card{
+    background:#fff;
+    padding:20px;
+    border-radius:16px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+}
+
+.dashboard-card h3{
+    font-size:15px;
+    margin-bottom:10px;
+    color:#666;
+}
+
+.dashboard-card p{
+    font-size:28px;
+    font-weight:bold;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:991px){
+
+    .sidebar{
+        width:220px;
+    }
+
+    .content{
+        margin-left:220px;
+    }
+
+    .dashboard-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:768px){
+
+    .admin-layout{
+        flex-direction:column;
+    }
+
+    .sidebar{
+        position:relative;
+        width:100%;
+        height:auto;
+    }
+
+    .content{
+        margin-left:0;
+        padding:15px;
+    }
+
+    .form{
+        flex-direction:column;
+    }
+
+    .dashboard-grid{
+        grid-template-columns:1fr;
+    }
+
+    table th,
+    table td{
+        font-size:13px;
+        padding:10px;
+    }
+
+    .content h1{
+        font-size:22px;
+    }
+
+}
+
+/* category */
+/* =========================
+   PAGE HEADER
+========================= */
+
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.page-header h1{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:28px;
+    margin-bottom:5px;
+}
+
+.page-header p{
+    color:#777;
+    font-size:14px;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.card{
+    background:#fff;
+    border-radius:18px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* =========================
+   ALERT
+========================= */
+
+.alert{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    padding:14px 16px;
+    border-radius:12px;
+
+    margin-bottom:20px;
+
+    font-size:14px;
+}
+
+.alert.success{
+    background:#d4edda;
+    color:#155724;
+}
+
+.alert.error{
+    background:#f8d7da;
+    color:#721c24;
+}
+
+/* =========================
+   FORM
+========================= */
+
+.category-form{
+    display:flex;
+    gap:12px;
+}
+
+.input-group{
+    flex:1;
+    position:relative;
+}
+
+.input-group i{
+    position:absolute;
+    left:15px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#777;
+    font-size:18px;
+}
+
+.input-group input{
+    width:100%;
+    height:50px;
+
+    border:1px solid #ddd;
+    border-radius:12px;
+
+    padding:0 15px 0 45px;
+
+    outline:none;
+}
+
+.category-form button{
+    height:50px;
+
+    border:none;
+    border-radius:12px;
+
+    background:#111;
+    color:#fff;
+
+    padding:0 20px;
+
+    cursor:pointer;
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+/* =========================
+   TABLE
+========================= */
+
+.table-wrapper{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+table th{
+    background:#111;
+    color:#fff;
+    padding:14px;
+    text-align:left;
+    font-size:14px;
+}
+
+table td{
+    padding:16px 14px;
+    border-bottom:1px solid #eee;
+}
+
+.category-name{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.category-name i{
+    font-size:18px;
+}
+
+/* =========================
+   ACTIONS
+========================= */
+
+.actions{
+    display:flex;
+    gap:10px;
+}
+
+.btn-edit,
+.btn-delete{
+    width:38px;
+    height:38px;
+
+    border-radius:10px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-decoration:none;
+}
+
+.btn-edit{
+    background:#111;
+    color:#fff;
+}
+
+.btn-delete{
+    background:#dc3545;
+    color:#fff;
+}
+
+/* =========================
+   EMPTY
+========================= */
+
+.empty-data{
+    padding:40px 20px;
+    text-align:center;
+}
+
+.empty-data i{
+    font-size:60px;
+    color:#999;
+    margin-bottom:10px;
+}
+
+.empty-data p{
+    color:#777;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:768px){
+
+    .page-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+    }
+
+    .category-form{
+        flex-direction:column;
+    }
+
+    .category-form button{
+        width:100%;
+        justify-content:center;
+    }
+
+    table th,
+    table td{
+        font-size:13px;
+    }
+
+}
+
+/* product */
+/* =========================
+   PRODUCT FORM
+========================= */
+
+.product-form{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+/* =========================
+   SELECT
+========================= */
+
+.product-form select{
+    width:100%;
+    height:50px;
+
+    border:1px solid #ddd;
+    border-radius:12px;
+
+    padding:0 15px 0 45px;
+
+    outline:none;
+    background:#fff;
+}
+
+/* =========================
+   TEXTAREA
+========================= */
+
+.textarea-group textarea{
+    width:100%;
+    min-height:120px;
+
+    border:1px solid #ddd;
+    border-radius:12px;
+
+    padding:15px;
+    outline:none;
+
+    resize:none;
+}
+
+/* =========================
+   FILE
+========================= */
+
+.input-file label{
+    width:100%;
+    height:55px;
+
+    border:2px dashed #ccc;
+    border-radius:12px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+
+    cursor:pointer;
+}
+
+.input-file input{
+    display:none;
+}
+
+/* =========================
+   BUTTON
+========================= */
+
+.product-form button{
+    height:50px;
+
+    border:none;
+    border-radius:12px;
+
+    background:#111;
+    color:#fff;
+
+    cursor:pointer;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+}
+
+/* =========================
+   PRODUCT IMAGE
+========================= */
+
+.product-image{
+    width:70px;
+    height:70px;
+
+    object-fit:cover;
+
+    border-radius:12px;
+}
+
+/* =========================
+   PRODUCT NAME
+========================= */
+
+.product-name{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.product-name i{
+    font-size:18px;
+}
+
+/* =========================
+   RATING
+========================= */
+
+.rating{
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+.rating i{
+    color:#f5b301;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:768px){
+
+    .product-image{
+        width:55px;
+        height:55px;
+    }
+
+}
+
+/* ====================================
+   PRODUCT PAGE
+==================================== */
+
+.product-page{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+/* ====================================
+   PAGE HEADER
+==================================== */
+
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    margin-bottom:10px;
+}
+
+.page-header h1{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    font-size:28px;
+    font-weight:700;
+}
+
+.page-header p{
+    margin-top:5px;
+    color:#777;
+    font-size:14px;
+}
+
+/* ====================================
+   CARD
+==================================== */
+
+.card{
+    background:#fff;
+    border-radius:20px;
+    padding:20px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* ====================================
+   PRODUCT FORM
+==================================== */
+
+.product-form{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+/* ====================================
+   FORM GRID
+==================================== */
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+}
+
+/* ====================================
+   INPUT GROUP
+==================================== */
+
+.input-group{
+    position:relative;
+}
+
+.input-group i{
+    position:absolute;
+    left:15px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#777;
+    font-size:18px;
+}
+
+.input-group input,
+.input-group select{
+    width:100%;
+    height:52px;
+
+    border:1px solid #ddd;
+    border-radius:14px;
+
+    padding:0 15px 0 45px;
+
+    outline:none;
+
+    background:#fff;
+
+    transition:0.2s;
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.textarea-group textarea:focus{
+    border-color:#111;
+}
+
+/* ====================================
+   TEXTAREA
+==================================== */
+
+.textarea-group textarea{
+    width:100%;
+    min-height:140px;
+
+    border:1px solid #ddd;
+    border-radius:14px;
+
+    padding:15px;
+
+    outline:none;
+
+    resize:none;
+
+    transition:0.2s;
+}
+
+/* ====================================
+   FILE
+==================================== */
+
+.input-file{
+    width:100%;
+}
+
+.input-file label{
+    width:100%;
+    min-height:120px;
+
+    border:2px dashed #ccc;
+    border-radius:16px;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+
+    cursor:pointer;
+
+    transition:0.2s;
+}
+
+.input-file label:hover{
+    border-color:#111;
+}
+
+.input-file i{
+    font-size:32px;
+    color:#555;
+}
+
+.input-file span{
+    color:#666;
+    font-size:14px;
+}
+
+.input-file input{
+    display:none;
+}
+
+/* ====================================
+   BUTTON
+==================================== */
+
+.product-form button{
+    height:52px;
+
+    border:none;
+    border-radius:14px;
+
+    background:#111;
+    color:#fff;
+
+    font-size:15px;
+    font-weight:600;
+
+    cursor:pointer;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+
+    transition:0.2s;
+}
+
+.product-form button:hover{
+    opacity:0.9;
+}
+
+/* ====================================
+   TABLE
+==================================== */
+
+.table-wrapper{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+table thead{
+    background:#111;
+}
+
+table th{
+    color:#fff;
+    font-size:14px;
+    font-weight:600;
+    text-align:left;
+
+    padding:15px;
+}
+
+table td{
+    padding:15px;
+    border-bottom:1px solid #eee;
+    vertical-align:middle;
+}
+
+table tr:hover{
+    background:#fafafa;
+}
+
+/* ====================================
+   PRODUCT IMAGE
+==================================== */
+
+.product-image{
+    width:75px;
+    height:75px;
+
+    object-fit:cover;
+
+    border-radius:14px;
+
+    border:1px solid #eee;
+}
+
+/* ====================================
+   PRODUCT NAME
+==================================== */
+
+.product-name{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    font-weight:500;
+}
+
+.product-name i{
+    font-size:18px;
+}
+
+/* ====================================
+   PRICE
+==================================== */
+
+.price{
+    font-weight:600;
+}
+
+.sale-price{
+    color:#dc3545;
+    font-weight:700;
+}
+
+.old-price{
+    color:#999;
+    text-decoration:line-through;
+    font-size:13px;
+    margin-top:3px;
+}
+
+/* ====================================
+   RATING
+==================================== */
+
+.rating{
+    display:flex;
+    align-items:center;
+    gap:5px;
+
+    font-weight:600;
+}
+
+.rating i{
+    color:#f5b301;
+}
+
+/* ====================================
+   ACTIONS
+==================================== */
+
+.actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.btn-edit,
+.btn-delete{
+    width:40px;
+    height:40px;
+
+    border-radius:10px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-decoration:none;
+
+    transition:0.2s;
+}
+
+.btn-edit{
+    background:#111;
+    color:#fff;
+}
+
+.btn-delete{
+    background:#dc3545;
+    color:#fff;
+}
+
+.btn-edit:hover,
+.btn-delete:hover{
+    transform:translateY(-2px);
+}
+
+/* ====================================
+   EMPTY
+==================================== */
+
+.empty-data{
+    padding:50px 20px;
+    text-align:center;
+}
+
+.empty-data i{
+    font-size:60px;
+    color:#999;
+    margin-bottom:10px;
+}
+
+.empty-data p{
+    color:#777;
+}
+
+/* ====================================
+   ALERT
+==================================== */
+
+.alert{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    padding:14px 16px;
+
+    border-radius:14px;
+
+    margin-bottom:20px;
+}
+
+.alert.success{
+    background:#d4edda;
+    color:#155724;
+}
+
+.alert.error{
+    background:#f8d7da;
+    color:#721c24;
+}
+
+/* ====================================
+   MOBILE
+==================================== */
+
+@media(max-width:991px){
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:768px){
+
+    .page-header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .page-header h1{
+        font-size:24px;
+    }
+
+    .card{
+        padding:15px;
+    }
+
+    table th,
+    table td{
+        padding:12px;
+        font-size:13px;
+    }
+
+    .product-image{
+        width:60px;
+        height:60px;
+    }
+
+    .btn-edit,
+    .btn-delete{
+        width:36px;
+        height:36px;
+    }
+
+}
+
+/* ====================================
+   PAGE
+==================================== */
+
+.orders-page{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+/* ====================================
+   PAGE HEADER
+==================================== */
+
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    margin-bottom:10px;
+}
+
+.page-header h1{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    font-size:30px;
+    font-weight:700;
+}
+
+.page-header p{
+    color:#777;
+    font-size:14px;
+    margin-top:5px;
+}
+
+/* ====================================
+   CARD
+==================================== */
+
+.card{
+    background:#fff;
+    border-radius:22px;
+    padding:20px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.04);
+}
+
+/* ====================================
+   DASHBOARD GRID
+==================================== */
+
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    margin-bottom:20px;
+}
+
+.dashboard-card{
+    background:#fff;
+    border-radius:22px;
+    padding:22px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.04);
+
+    transition:0.2s;
+}
+
+.dashboard-card:hover{
+    transform:translateY(-3px);
+}
+
+.dashboard-card h3{
+    font-size:14px;
+    color:#777;
+    margin-bottom:10px;
+    font-weight:500;
+}
+
+.dashboard-card p{
+    font-size:30px;
+    font-weight:700;
+}
+
+/* ====================================
+   CARD ICON
+==================================== */
+
+.card-icon{
+    width:58px;
+    height:58px;
+
+    border-radius:16px;
+
+    background:#111;
+    color:#fff;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:25px;
+
+    margin-bottom:16px;
+}
+
+.card-icon.yellow{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.card-icon.green{
+    background:#d4edda;
+    color:#155724;
+}
+
+.card-icon.black{
+    background:#111;
+    color:#fff;
+}
+
+/* ====================================
+   FILTER
+==================================== */
+
+.filter-form{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.filter-form select,
+.filter-form input[type="date"]{
+    height:50px;
+
+    border:1px solid #e5e5e5;
+    border-radius:14px;
+
+    padding:0 15px;
+
+    outline:none;
+
+    background:#fff;
+
+    transition:0.2s;
+}
+
+.filter-form select{
+    width:260px;
+}
+
+.filter-form input[type="date"]{
+    width:220px;
+}
+
+.filter-form select:focus,
+.filter-form input[type="date"]:focus{
+    border-color:#111;
+}
+
+.filter-form button{
+    height:50px;
+
+    border:none;
+    border-radius:14px;
+
+    padding:0 22px;
+
+    background:#111;
+    color:#fff;
+
+    cursor:pointer;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+
+    font-weight:600;
+
+    transition:0.2s;
+}
+
+.filter-form button:hover{
+    opacity:0.9;
+}
+
+/* ====================================
+   TABLE
+==================================== */
+
+.table-wrapper{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1000px;
+}
+
+table thead{
+    background:#111;
+}
+
+table th{
+    color:#fff;
+
+    padding:16px;
+
+    text-align:left;
+
+    font-size:14px;
+    font-weight:600;
+}
+
+table td{
+    padding:16px;
+    border-bottom:1px solid #f1f1f1;
+    vertical-align:middle;
+}
+
+table tbody tr{
+    transition:0.2s;
+}
+
+table tbody tr:hover{
+    background:#fafafa;
+}
+
+/* ====================================
+   ORDER ID
+==================================== */
+
+.order-id{
+    font-weight:700;
+    color:#111;
+}
+
+/* ====================================
+   CUSTOMER
+==================================== */
+
+.customer{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:500;
+}
+
+.customer i{
+    width:34px;
+    height:34px;
+
+    border-radius:10px;
+
+    background:#f5f5f5;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:18px;
+}
+
+/* ====================================
+   STATUS
+==================================== */
+
+.status{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    min-width:110px;
+
+    padding:8px 14px;
+
+    border-radius:999px;
+
+    font-size:13px;
+    font-weight:600;
+}
+
+.status.pending{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.status.confirmed{
+    background:#cce5ff;
+    color:#004085;
+}
+
+.status.delivered{
+    background:#d4edda;
+    color:#155724;
+}
+
+.status.cancelled{
+    background:#f8d7da;
+    color:#721c24;
+}
+
+/* ====================================
+   ACTIONS
+==================================== */
+
+.actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.btn-view{
+    width:42px;
+    height:42px;
+
+    border-radius:12px;
+
+    background:#111;
+    color:#fff;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-decoration:none;
+
+    transition:0.2s;
+}
+
+.btn-view:hover{
+    transform:translateY(-2px);
+}
+
+.status-select{
+    height:42px;
+
+    border:1px solid #ddd;
+    border-radius:12px;
+
+    padding:0 12px;
+
+    outline:none;
+
+    background:#fff;
+}
+
+/* ====================================
+   LOCKED
+==================================== */
+
+.locked-status{
+    height:42px;
+
+    padding:0 14px;
+
+    border-radius:12px;
+
+    background:#f5f5f5;
+    color:#666;
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    font-size:13px;
+    font-weight:500;
+}
+
+/* ====================================
+   EMPTY
+==================================== */
+
+.empty-data{
+    padding:60px 20px;
+    text-align:center;
+}
+
+.empty-data i{
+    font-size:60px;
+    color:#aaa;
+    margin-bottom:10px;
+}
+
+.empty-data p{
+    color:#777;
+}
+
+/* ====================================
+   TABLE SCROLL
+==================================== */
+
+.table-wrapper::-webkit-scrollbar{
+    height:8px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb{
+    background:#ddd;
+    border-radius:999px;
+}
+
+/* ====================================
+   TABLET
+==================================== */
+
+@media(max-width:991px){
+
+    .dashboard-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+/* ====================================
+   MOBILE
+==================================== */
+
+@media(max-width:768px){
+
+    .page-header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .page-header h1{
+        font-size:24px;
+    }
+
+    .dashboard-grid{
+        grid-template-columns:1fr;
+        gap:15px;
+    }
+
+    .dashboard-card{
+        padding:18px;
+    }
+
+    .dashboard-card p{
+        font-size:26px;
+    }
+
+    .filter-form{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .filter-form select,
+    .filter-form input[type="date"],
+    .filter-form button{
+        width:100%;
+    }
+
+    .card{
+        padding:15px;
+        border-radius:18px;
+    }
+
+    table{
+        min-width:850px;
+    }
+
+    table th,
+    table td{
+        padding:14px;
+        font-size:13px;
+    }
+
+    .actions{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .status{
+        min-width:95px;
+        font-size:12px;
+    }
+
+}
+
+/* chitiet */
+
+
+/* ====================================
+   BODY
+==================================== */
+
+body{
+    margin:0;
+    padding:30px;
+
+    background:#f5f5f5;
+
+    font-family:Arial, sans-serif;
+}
+
+/* ====================================
+   PAGE
+==================================== */
+
+.invoice-page{
+    max-width:1200px;
+    margin:auto;
+
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+/* ====================================
+   HEADER
+==================================== */
+
+.invoice-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+}
+
+.invoice-header h1{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    font-size:30px;
+}
+
+.back-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+
+    margin-bottom:10px;
+
+    text-decoration:none;
+    color:#111;
+
+    font-weight:600;
+}
+
+.print-btn{
+    height:50px;
+
+    border:none;
+    border-radius:14px;
+
+    background:#111;
+    color:#fff;
+
+    padding:0 20px;
+
+    cursor:pointer;
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    font-weight:600;
+}
+
+/* ====================================
+   GRID
+==================================== */
+
+.info-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+/* ====================================
+   CARD
+==================================== */
+
+.card,
+.summary-card{
+    background:#fff;
+
+    border-radius:22px;
+
+    padding:24px;
+
+    box-shadow:0 5px 20px rgba(0,0,0,0.04);
+}
+
+.card h3{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    margin-bottom:20px;
+}
+
+.card ul{
+    list-style:none;
+    padding:0;
+    margin:0;
+}
+
+.card ul li{
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+
+    padding:14px 0;
+
+    border-bottom:1px solid #f1f1f1;
+}
+
+/* ====================================
+   STATUS
+==================================== */
+
+.status{
+    padding:8px 14px;
+    border-radius:999px;
+
+    font-size:13px;
+    font-weight:600;
+}
+
+.status.pending{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.status.confirmed{
+    background:#cce5ff;
+    color:#004085;
+}
+
+.status.delivered{
+    background:#d4edda;
+    color:#155724;
+}
+
+.status.cancelled{
+    background:#f8d7da;
+    color:#721c24;
+}
+
+/* ====================================
+   TABLE
+==================================== */
+
+.table-wrapper{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+table thead{
+    background:#111;
+}
+
+table th{
+    color:#fff;
+
+    text-align:left;
+
+    padding:16px;
+}
+
+table td{
+    padding:16px;
+
+    border-bottom:1px solid #f1f1f1;
+}
+
+/* ====================================
+   PRODUCT
+==================================== */
+
+.product-name{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    font-weight:600;
+}
+
+.product-image{
+    width:70px;
+    height:70px;
+
+    object-fit:cover;
+
+    border-radius:14px;
+}
+
+/* ====================================
+   SUMMARY
+==================================== */
+
+.summary-card{
+    margin-left:auto;
+    width:400px;
+}
+
+.summary-row{
+    display:flex;
+    justify-content:space-between;
+
+    padding:14px 0;
+
+    border-bottom:1px solid #f1f1f1;
+}
+
+.summary-row.total{
+    font-size:22px;
+    font-weight:700;
+
+    border:none;
+}
+
+/* ====================================
+   MOBILE
+==================================== */
+
+@media(max-width:768px){
+
+    body{
+        padding:15px;
+    }
+
+    .invoice-header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .invoice-header h1{
+        font-size:24px;
+    }
+
+    .info-grid{
+        grid-template-columns:1fr;
+    }
+
+    .summary-card{
+        width:100%;
+    }
+
+    table{
+        min-width:700px;
+    }
+
+}
+
+/* ====================================
+   PAGINATION
+==================================== */
+
+.pagination{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+
+    margin-top:25px;
+
+    flex-wrap:wrap;
+}
+
+.pagination a{
+    width:42px;
+    height:42px;
+
+    border-radius:12px;
+
+    background:#fff;
+    color:#111;
+
+    text-decoration:none;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:1px solid #eee;
+
+    transition:0.2s;
+}
+
+.pagination a:hover{
+    background:#111;
+    color:#fff;
+}
+
+.pagination a.active{
+    background:#111;
+    color:#fff;
+}
