@@ -1,25 +1,28 @@
 <?php
 
 require_once "../core/db.php";
-require_once "../core/auth.php";
-
-/*
-|--------------------------------------------------------------------------
-| GET ORDER ID
-|--------------------------------------------------------------------------
-*/
-
-if (!isset($_GET['id'])) {
-
-    header("Location: index.php?page=orders");
-    exit;
-}
-
-$orderId = (int) $_GET['id'];
 
 /*
 |--------------------------------------------------------------------------
 | GET ORDER
+|--------------------------------------------------------------------------
+*/
+
+if(!isset($_GET['id'])){
+
+    header("Location: index.php?page=orders");
+    exit;
+
+}
+
+$orderId = (int)$_GET['id'];
+
+/*
+|--------------------------------------------------------------------------
+| ORDER
+|--------------------------------------------------------------------------
+|
+| lấy đúng dữ liệu từ bảng orders
 |--------------------------------------------------------------------------
 */
 
@@ -33,92 +36,70 @@ $stmt->execute([$orderId]);
 
 $order = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$order) {
+if(!$order){
 
     header("Location: index.php?page=orders");
     exit;
+
 }
 
 /*
 |--------------------------------------------------------------------------
-| GET ORDER DETAILS
+| ORDER DETAILS
+|--------------------------------------------------------------------------
+|
+| lấy đúng giá từ order_details.price
 |--------------------------------------------------------------------------
 */
 
-$details = $pdo->prepare("
-    SELECT 
-        order_details.*,
+$detailStmt = $pdo->prepare("
+    SELECT
+
+        order_details.id,
+        order_details.quantity,
+        order_details.price,
+
         products.name,
         products.image
+
     FROM order_details
 
     LEFT JOIN products
     ON order_details.product_id = products.id
 
     WHERE order_details.order_id = ?
+
+    ORDER BY order_details.id DESC
 ");
 
-$details->execute([$orderId]);
+$detailStmt->execute([$orderId]);
 
-$items = $details->fetchAll(PDO::FETCH_ASSOC);
-
-/*
-|--------------------------------------------------------------------------
-| SHIPPING CALCULATION
-|--------------------------------------------------------------------------
-|
-| dưới 2km free
-| trên 2km:
-| phí mở đầu 7k
-| sau đó mỗi 2km +5k
-|--------------------------------------------------------------------------
-*/
-
-$distanceKm = $order['distance_km'] ?? 1;
-
-if($distanceKm < 2){
-
-    $shippingFee = 0;
-
-}else{
-
-    /*
-    |--------------------------------------------------------------------------
-    | BASE SHIP
-    |--------------------------------------------------------------------------
-    */
-
-    $shippingFee = 7000;
-
-    /*
-    |--------------------------------------------------------------------------
-    | EXTRA DISTANCE
-    |--------------------------------------------------------------------------
-    */
-
-    $extraKm = $distanceKm - 2;
-
-    if($extraKm > 0){
-
-        $shippingFee += ceil($extraKm / 2) * 5000;
-    }
-}
+$orderItems = $detailStmt->fetchAll(PDO::FETCH_ASSOC);
 
 /*
 |--------------------------------------------------------------------------
-| SUBTOTAL
+| PRODUCT TOTAL
 |--------------------------------------------------------------------------
 */
 
-$subtotal = 0;
+$productTotal = 0;
 
-foreach($items as $item){
+foreach($orderItems as $item){
 
-    $subtotal += (
+    $productTotal += (
         $item['price'] *
         $item['quantity']
     );
+
 }
+
+/*
+|--------------------------------------------------------------------------
+| SHIPPING
+|--------------------------------------------------------------------------
+*/
+
+$shippingFee = 7000;
 
 /*
 |--------------------------------------------------------------------------
@@ -126,7 +107,10 @@ foreach($items as $item){
 |--------------------------------------------------------------------------
 */
 
-$finalTotal = $subtotal + $shippingFee;
+$finalTotal = (
+    $productTotal +
+    $shippingFee
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -136,7 +120,7 @@ $finalTotal = $subtotal + $shippingFee;
 
 $statusLabels = [
 
-    'pending' => 'Chờ xác nhận',
+    'pending'   => 'Chờ xác nhận',
 
     'confirmed' => 'Đã xác nhận',
 
@@ -155,20 +139,19 @@ $statusLabels = [
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta 
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>
         Chi tiết đơn hàng
     </title>
 
-    <!-- BOXICONS -->
-
     <link 
         href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css'
         rel='stylesheet'
     >
-
-    <!-- CSS -->
 
     <link 
         rel="stylesheet"
@@ -213,7 +196,10 @@ $statusLabels = [
 
         </div>
 
-        <button onclick="window.print()" class="print-btn">
+        <button 
+            onclick="window.print()"
+            class="print-btn"
+        >
 
             <i class='bx bx-printer'></i>
 
@@ -243,10 +229,14 @@ $statusLabels = [
 
                 <li>
 
-                    <span>Họ tên:</span>
+                    <span>Khách hàng:</span>
 
                     <strong>
-                        <?= htmlspecialchars($order['customer_name']) ?>
+
+                        <?= htmlspecialchars(
+                            $order['customer_name']
+                        ) ?>
+
                     </strong>
 
                 </li>
@@ -256,7 +246,9 @@ $statusLabels = [
                     <span>Số điện thoại:</span>
 
                     <strong>
+
                         <?= $order['phone'] ?>
+
                     </strong>
 
                 </li>
@@ -266,7 +258,11 @@ $statusLabels = [
                     <span>Địa chỉ:</span>
 
                     <strong>
-                        <?= htmlspecialchars($order['address']) ?>
+
+                        <?= htmlspecialchars(
+                            $order['address']
+                        ) ?>
+
                     </strong>
 
                 </li>
@@ -295,7 +291,9 @@ $statusLabels = [
 
                     <span class="status <?= $order['status'] ?>">
 
-                        <?= $statusLabels[$order['status']] ?>
+                        <?= $statusLabels[
+                            $order['status']
+                        ] ?>
 
                     </span>
 
@@ -303,38 +301,30 @@ $statusLabels = [
 
                 <li>
 
-                    <span>Ngày đặt:</span>
+                    <span>Ngày tạo:</span>
 
                     <strong>
 
                         <?= date(
                             "d/m/Y H:i",
-                            strtotime($order['created_at'])
+                            strtotime(
+                                $order['created_at']
+                            )
                         ) ?>
 
                     </strong>
 
                 </li>
 
-                <!-- <li>
-
-                    <span>Khoảng cách:</span>
-
-                    <strong>
-
-                        <?= $distanceKm ?> km
-
-                    </strong>
-
-                </li> -->
-
                 <li>
 
-                    <span>Phí ship:</span>
+                    <span>Phí vận chuyển:</span>
 
                     <strong>
 
-                        7000đ
+                        <?= number_format(
+                            $shippingFee
+                        ) ?>đ
 
                     </strong>
 
@@ -351,13 +341,13 @@ $statusLabels = [
                 <div>
 
                     <h4>
-                        Chính sách giao hàng
+                        Chính sách vận chuyển
                     </h4>
 
                     <p>
-                        Đơn dưới 2km được miễn phí vận chuyển.
-                        Từ 2km trở lên tính phí cố định 7.000đ,
-                        sau đó cộng thêm 5.000đ mỗi 2km tiếp theo.
+                        Đơn dưới 2km miễn phí vận chuyển.
+                        Trên 2km tính 7.000đ,
+                        sau đó mỗi 2km tiếp theo cộng thêm 7.000đ.
                     </p>
 
                 </div>
@@ -368,7 +358,7 @@ $statusLabels = [
 
     </div>
 
-    <!-- PRODUCT TABLE -->
+    <!-- TABLE -->
 
     <div class="card">
 
@@ -392,11 +382,11 @@ $statusLabels = [
 
                 <tbody>
 
-                    <?php foreach($items as $item): ?>
+                    <?php foreach($orderItems as $item): ?>
 
                         <tr>
 
-                            <!-- NAME -->
+                            <!-- PRODUCT -->
 
                             <td>
 
@@ -404,7 +394,9 @@ $statusLabels = [
 
                                     <i class='bx bxs-coffee'></i>
 
-                                    <?= htmlspecialchars($item['name']) ?>
+                                    <?= htmlspecialchars(
+                                        $item['name']
+                                    ) ?>
 
                                 </div>
 
@@ -425,7 +417,9 @@ $statusLabels = [
 
                             <td>
 
-                                <?= number_format($item['price']) ?>đ
+                                <?= number_format(
+                                    $item['price']
+                                ) ?>đ
 
                             </td>
 
@@ -437,14 +431,15 @@ $statusLabels = [
 
                             </td>
 
-                            <!-- TOTAL -->
+                            <!-- ITEM TOTAL -->
 
                             <td>
 
                                 <strong>
 
                                     <?= number_format(
-                                        $item['price'] * $item['quantity']
+                                        $item['price'] *
+                                        $item['quantity']
                                     ) ?>đ
 
                                 </strong>
@@ -463,27 +458,35 @@ $statusLabels = [
 
     </div>
 
-    <!-- TOTAL -->
+    <!-- SUMMARY -->
 
     <div class="summary-card">
 
+        <!-- PRODUCT TOTAL -->
+
         <div class="summary-row">
 
-            <span>Tạm tính</span>
+            <span>
+                Tiền sản phẩm
+            </span>
 
             <strong>
 
                 <?= number_format(
-                    $subtotal
+                    $productTotal
                 ) ?>đ
 
             </strong>
 
         </div>
 
+        <!-- SHIPPING -->
+
         <div class="summary-row">
 
-            <span>Phí giao hàng</span>
+            <span>
+                Phí vận chuyển
+            </span>
 
             <strong>
 
@@ -495,9 +498,13 @@ $statusLabels = [
 
         </div>
 
+        <!-- FINAL -->
+
         <div class="summary-row total">
 
-            <span>Tổng thanh toán</span>
+            <span>
+                Tổng thanh toán
+            </span>
 
             <strong>
 
