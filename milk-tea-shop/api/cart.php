@@ -1,8 +1,16 @@
 <?php
 
+error_reporting(0);
+
 session_start();
 
 header('Content-Type: application/json');
+
+/*
+|----------------------------------------------------------
+| DATABASE
+|----------------------------------------------------------
+*/
 
 $host = "localhost";
 $user = "root";
@@ -11,7 +19,23 @@ $database = "milk_tea_shop";
 
 $conn = mysqli_connect($host, $user, $password, $database);
 
+if(!$conn){
+
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Kết nối database thất bại'
+    ]);
+
+    exit;
+}
+
 mysqli_set_charset($conn,"utf8");
+
+/*
+|----------------------------------------------------------
+| SESSION
+|----------------------------------------------------------
+*/
 
 $sessionId = session_id();
 
@@ -19,7 +43,7 @@ $action = $_POST['action'] ?? '';
 
 /*
 |----------------------------------------------------------
-| LẤY CART ID
+| LẤY HOẶC TẠO CART
 |----------------------------------------------------------
 */
 
@@ -34,15 +58,51 @@ $cart = mysqli_fetch_assoc($getCart);
 
 if(!$cart){
 
+    mysqli_query($conn,"
+        INSERT INTO carts(session_id)
+        VALUES('$sessionId')
+    ");
+
+    $cartId = mysqli_insert_id($conn);
+
+}else{
+
+    $cartId = $cart['id'];
+
+}
+
+/*
+|----------------------------------------------------------
+| LIST CART
+|----------------------------------------------------------
+*/
+
+if($action === 'list'){
+
+    $query = mysqli_query($conn,"
+        SELECT quantity
+        FROM cart_items
+        WHERE cart_id = '$cartId'
+    ");
+
+    $items = [];
+
+    while($row = mysqli_fetch_assoc($query)){
+
+        $items[] = [
+            'quantity' => (int)$row['quantity']
+        ];
+
+    }
+
     echo json_encode([
-        'status' => 'error'
+        'status' => 'success',
+        'items' => $items
     ]);
 
     exit;
 
 }
-
-$cartId = $cart['id'];
 
 /*
 |----------------------------------------------------------
@@ -152,6 +212,13 @@ if($action === 'add'){
 
 }
 
+/*
+|----------------------------------------------------------
+| ACTION KHÔNG HỢP LỆ
+|----------------------------------------------------------
+*/
+
 echo json_encode([
-    'status' => 'error'
+    'status' => 'error',
+    'message' => 'Action không hợp lệ'
 ]);
