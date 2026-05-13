@@ -1,111 +1,292 @@
 <?php
+
 session_start();
 
-require_once "../core/db.php";
+$host = "localhost";
+$user = "root";
+$password = "mysql";
+$database = "milk_tea_shop";
+
+$conn = mysqli_connect($host, $user, $password, $database);
+
+if (!$conn) {
+    die("Kết nối database thất bại");
+}
+
+mysqli_set_charset($conn, "utf8");
 
 $error = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $username = trim($_POST['username']);
-    $password = trim($_POST['password']);
+    $passwordInput = trim($_POST['password']);
 
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
-    $stmt->execute([$username]);
+    if (empty($username) || empty($passwordInput)) {
 
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($user && password_verify($password, $user['password'])) {
-
-        $_SESSION['admin_logged_in'] = true;
-        $_SESSION['admin_username'] = $user['username'];
-
-        header("Location: index.php");
-        exit;
+        $error = "Vui lòng nhập đầy đủ thông tin";
 
     } else {
-        $error = "Sai tài khoản hoặc mật khẩu";
+
+        $stmt = mysqli_prepare($conn, "
+            SELECT * FROM users
+            WHERE username = ?
+            LIMIT 1
+        ");
+
+        mysqli_stmt_bind_param($stmt, "s", $username);
+
+        mysqli_stmt_execute($stmt);
+
+        $result = mysqli_stmt_get_result($stmt);
+
+        if ($result && mysqli_num_rows($result) > 0) {
+
+            $user = mysqli_fetch_assoc($result);
+
+            if (password_verify($passwordInput, $user['password'])) {
+
+                session_regenerate_id(true);
+
+                $_SESSION['admin_id'] = $user['id'];
+                $_SESSION['admin_username'] = $user['username'];
+
+                header("Location: ./index.php");
+                exit;
+
+            } else {
+
+                $error = "Sai tài khoản hoặc mật khẩu";
+
+            }
+
+        } else {
+
+            $error = "Sai tài khoản hoặc mật khẩu";
+
+        }
+
     }
+
 }
+
 ?>
 
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+
     <meta charset="UTF-8">
-    <title>Admin Login</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Đăng nhập quản trị</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
 
     <style>
-        body{
-            font-family: Arial;
-            background:#f5f5f5;
-        }
 
-        .box{
-            width:350px;
-            margin:100px auto;
-            background:#fff;
-            padding:25px;
-            border-radius:10px;
-        }
-
-        input{
-            width:100%;
-            padding:12px;
-            margin-bottom:15px;
+        *{
+            margin:0;
+            padding:0;
             box-sizing:border-box;
         }
 
-        button{
-            width:100%;
-            padding:12px;
-            border:none;
-            background:black;
-            color:white;
-            cursor:pointer;
+        body{
+            font-family:'Be Vietnam Pro',sans-serif;
+            background:#f5f5f5;
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:20px;
         }
 
-        .error{
-            color:red;
-            margin-bottom:10px;
+        .login-box{
+            width:100%;
+            max-width:420px;
+            background:white;
+            border-radius:28px;
+            padding:32px 24px;
+            box-shadow:0 20px 60px rgba(0,0,0,.08);
         }
+
+        .logo{
+            width:72px;
+            height:72px;
+            border-radius:20px;
+            background:#111827;
+            color:white;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:28px;
+            margin:auto auto 22px;
+        }
+
+        .title{
+            text-align:center;
+            margin-bottom:8px;
+            font-size:28px;
+            font-weight:700;
+            color:#111827;
+        }
+
+        .description{
+            text-align:center;
+            color:#6b7280;
+            font-size:14px;
+            line-height:1.6;
+            margin-bottom:28px;
+        }
+
+        .form-group{
+            margin-bottom:18px;
+        }
+
+        .form-label{
+            display:block;
+            margin-bottom:8px;
+            font-size:14px;
+            font-weight:500;
+            color:#374151;
+        }
+
+        .form-control{
+            width:100%;
+            height:54px;
+            border:1px solid #d1d5db;
+            border-radius:16px;
+            padding:0 16px;
+            font-size:15px;
+            outline:none;
+            transition:.2s;
+        }
+
+        .form-control:focus{
+            border-color:#111827;
+        }
+
+        .login-btn{
+            width:100%;
+            height:56px;
+            border:none;
+            border-radius:18px;
+            background:#111827;
+            color:white;
+            font-size:15px;
+            font-weight:600;
+            cursor:pointer;
+            transition:.2s;
+        }
+
+        .login-btn:hover{
+            opacity:.92;
+        }
+
+        .error-box{
+            background:#fef2f2;
+            color:#dc2626;
+            padding:14px 16px;
+            border-radius:14px;
+            margin-bottom:18px;
+            font-size:14px;
+        }
+
+        .footer{
+            text-align:center;
+            margin-top:22px;
+            color:#9ca3af;
+            font-size:13px;
+        }
+
     </style>
+
 </head>
 <body>
 
-<div class="box">
+    <div class="login-box">
 
-    <h2>Admin Login</h2>
-
-    <?php if($error): ?>
-        <div class="error">
-            <?= $error ?>
+        <div class="logo">
+            <i class="fa-solid fa-lock"></i>
         </div>
-    <?php endif; ?>
 
-    <form method="POST">
+        <h1 class="title">
+            Admin Login
+        </h1>
 
-        <input 
-            type="text" 
-            name="username" 
-            placeholder="Username"
-            required
-        >
+        <p class="description">
+            Đăng nhập quản trị hệ thống Tiệm Trà Sữa X
+        </p>
 
-        <input 
-            type="password" 
-            name="password" 
-            placeholder="Password"
-            required
-        >
+        <?php if(!empty($error)): ?>
 
-        <button type="submit">
-            Đăng nhập
-        </button>
+            <div class="error-box">
+                <?= $error ?>
+            </div>
 
-    </form>
+        <?php endif; ?>
 
-</div>
+        <form method="POST">
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Tài khoản
+                </label>
+
+                <input
+                    type="text"
+                    name="username"
+                    class="form-control"
+                    placeholder="Nhập tài khoản"
+                    required
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Mật khẩu
+                </label>
+
+                <input
+                    type="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="Nhập mật khẩu"
+                    required
+                >
+
+            </div>
+
+            <button type="submit" class="login-btn">
+                Đăng nhập quản trị
+            </button>
+
+        </form>
+
+        <div class="footer">
+            © 2026 Tiệm Trà Sữa X
+        </div>
+
+    </div>
 
 </body>
 </html>
