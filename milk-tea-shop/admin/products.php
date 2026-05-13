@@ -1,5 +1,5 @@
 <?php
-
+require_once "../core/auth.php";
 require_once "../core/db.php";
 
 /*
@@ -19,7 +19,11 @@ if (isset($_GET['delete'])) {
 
     $delete->execute([$id]);
 
-    header("Location: index.php?page=products");
+    echo "
+    <script>
+    window.location.href='index.php?page=products';
+    </script>
+    ";
     exit;
 }
 
@@ -64,13 +68,15 @@ if (isset($_POST['add_product'])) {
 
     $description = trim($_POST['description']);
 
-    $rating = $_POST['rating_fake'];
+    $rating = (float) $_POST['rating_fake'];
 
-    /*
-    |--------------------------------------------------------------------------
-    | IMAGE
-    |--------------------------------------------------------------------------
-    */
+    if($rating < 1){
+        $rating = 1;
+    }
+
+    if($rating > 5){
+        $rating = 5;
+    }
 
     $image = "";
 
@@ -98,12 +104,6 @@ if (isset($_POST['add_product'])) {
         );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | INSERT
-    |--------------------------------------------------------------------------
-    */
-
     $insert = $pdo->prepare("
         INSERT INTO products(
             name,
@@ -129,7 +129,11 @@ if (isset($_POST['add_product'])) {
         $rating
     ]);
 
-    header("Location: index.php?page=products");
+    echo "
+    <script>
+    window.location.href='index.php?page=products';
+    </script>
+    ";
     exit;
 }
 
@@ -153,13 +157,15 @@ if (isset($_POST['update_product'])) {
 
     $description = trim($_POST['description']);
 
-    $rating = $_POST['rating_fake'];
+    $rating = (float) $_POST['rating_fake'];
 
-    /*
-    |--------------------------------------------------------------------------
-    | CURRENT IMAGE
-    |--------------------------------------------------------------------------
-    */
+    if($rating < 1){
+        $rating = 1;
+    }
+
+    if($rating > 5){
+        $rating = 5;
+    }
 
     $stmt = $pdo->prepare("
         SELECT image
@@ -172,12 +178,6 @@ if (isset($_POST['update_product'])) {
     $currentProduct = $stmt->fetch(PDO::FETCH_ASSOC);
 
     $image = $currentProduct['image'];
-
-    /*
-    |--------------------------------------------------------------------------
-    | NEW IMAGE
-    |--------------------------------------------------------------------------
-    */
 
     if (
         isset($_FILES['image']) &&
@@ -203,12 +203,6 @@ if (isset($_POST['update_product'])) {
         );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE
-    |--------------------------------------------------------------------------
-    */
-
     $update = $pdo->prepare("
         UPDATE products
         SET
@@ -233,7 +227,11 @@ if (isset($_POST['update_product'])) {
         $id
     ]);
 
-    header("Location: index.php?page=products");
+    echo "
+    <script>
+    window.location.href='index.php?page=products';
+    </script>
+    ";
     exit;
 }
 
@@ -304,39 +302,319 @@ $products = $pdo->query("
 
 ?>
 
-<link 
-    rel="stylesheet"
-    href="../assets/css/admin.css"
->
+<style>
 
-<div class="page-header">
+.products-page-header{
+    margin-bottom:24px;
+}
 
-    <div>
+.products-page-header h1{
+    font-size:28px;
+    margin-bottom:8px;
+    color:#111827;
+}
 
-        <h1>
+.products-page-header p{
+    color:#6b7280;
+}
 
-            <i class='bx bxs-coffee-alt'></i>
+.products-card{
+    background:#fff;
+    border-radius:20px;
+    padding:24px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.05);
+    margin-bottom:24px;
+}
 
-            Quản lí sản phẩm
+.products-form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
 
-        </h1>
+.products-input-group{
+    position:relative;
+}
 
-        <p>
-            Quản lí menu trà sữa và bánh ngọt
-        </p>
+.products-input-group i{
+    position:absolute;
+    left:15px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#9ca3af;
+    font-size:20px;
+}
 
-    </div>
+.products-input-group input,
+.products-input-group select{
+    width:100%;
+    height:52px;
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    padding:0 16px 0 48px;
+    font-size:15px;
+    transition:0.25s;
+    background:#fff;
+}
+
+.products-input-group input:focus,
+.products-input-group select:focus,
+.products-textarea textarea:focus{
+    border-color:#f59e0b;
+    outline:none;
+}
+
+.products-textarea{
+    grid-column:1 / -1;
+}
+
+.products-textarea textarea{
+    width:100%;
+    min-height:130px;
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    padding:16px;
+    resize:none;
+    font-size:15px;
+}
+
+.products-file{
+    grid-column:1 / -1;
+}
+
+.products-file label{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#fff7ed;
+    color:#ea580c;
+    padding:16px;
+    border-radius:14px;
+    cursor:pointer;
+    font-weight:600;
+    border:2px dashed #fdba74;
+}
+
+.products-file input{
+    display:none;
+}
+
+.products-preview{
+    margin-top:18px;
+}
+
+.products-preview img{
+    width:100%;
+    max-width:350px;
+    height:230px;
+    object-fit:cover;
+    border-radius:18px;
+    border:2px solid #f1f5f9;
+    background:#f9fafb;
+    display:block;
+}
+
+.products-submit{
+    grid-column:1 / -1;
+}
+
+.products-submit button{
+    width:100%;
+    height:54px;
+    border:none;
+    border-radius:14px;
+    background:#f59e0b;
+    color:#fff;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    transition:0.25s;
+}
+
+.products-submit button:hover{
+    background:#d97706;
+}
+
+.products-table-wrapper{
+    overflow-x:auto;
+}
+
+.products-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.products-table th{
+    background:#f9fafb;
+    padding:15px;
+    text-align:left;
+    color:#6b7280;
+    font-size:14px;
+}
+
+.products-table td{
+    padding:16px 15px;
+    border-bottom:1px solid #f1f5f9;
+    vertical-align:middle;
+}
+
+.products-info{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    min-width:220px;
+}
+
+.products-info img{
+    width:70px;
+    height:70px;
+    object-fit:cover;
+    border-radius:16px;
+    background:#f3f4f6;
+}
+
+.products-price{
+    font-weight:700;
+    color:#111827;
+}
+
+.products-sale{
+    color:#dc2626;
+    font-weight:700;
+}
+
+.products-rating{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:#f59e0b;
+    font-weight:700;
+}
+
+.products-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.products-actions a{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:18px;
+    transition:0.25s;
+}
+
+.products-edit{
+    background:#2563eb;
+}
+
+.products-delete{
+    background:#dc2626;
+}
+
+.products-pagination{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+    margin-top:24px;
+    flex-wrap:wrap;
+}
+
+.products-pagination a{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#f3f4f6;
+    color:#111827;
+    font-weight:600;
+}
+
+.products-pagination a.active{
+    background:#f59e0b;
+    color:#fff;
+}
+
+.products-empty{
+    text-align:center;
+    padding:40px 20px;
+    color:#6b7280;
+}
+
+.products-empty i{
+    font-size:55px;
+    margin-bottom:10px;
+}
+
+@media(max-width:768px){
+
+    .products-form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .products-card{
+        padding:18px;
+    }
+
+    .products-page-header h1{
+        font-size:24px;
+    }
+
+    .products-table th,
+    .products-table td{
+        padding:12px 10px;
+        font-size:13px;
+    }
+
+    .products-info{
+        min-width:180px;
+    }
+
+    .products-info img{
+        width:55px;
+        height:55px;
+    }
+
+    .products-actions{
+        flex-direction:column;
+    }
+
+    .products-preview img{
+        max-width:100%;
+        height:200px;
+    }
+
+}
+
+</style>
+
+<div class="products-page-header">
+
+    <h1>
+        <i class='bx bxs-package'></i>
+        Quản lí sản phẩm
+    </h1>
+
+    <p>
+        Quản lí menu trà sữa và bánh ngọt
+    </p>
 
 </div>
 
-<!-- FORM -->
-
-<div class="card">
+<div class="products-card">
 
     <form 
         method="POST"
         enctype="multipart/form-data"
-        class="product-form"
+        class="products-form-grid"
     >
 
         <?php if($editProduct): ?>
@@ -349,9 +627,7 @@ $products = $pdo->query("
 
         <?php endif; ?>
 
-        <!-- NAME -->
-
-        <div class="input-group">
+        <div class="products-input-group">
 
             <i class='bx bx-coffee'></i>
 
@@ -360,15 +636,12 @@ $products = $pdo->query("
                 name="name"
                 placeholder="Tên sản phẩm"
                 required
-
                 value="<?= $editProduct['name'] ?? '' ?>"
             >
 
         </div>
 
-        <!-- CATEGORY -->
-
-        <div class="input-group">
+        <div class="products-input-group">
 
             <i class='bx bx-category'></i>
 
@@ -401,9 +674,7 @@ $products = $pdo->query("
 
         </div>
 
-        <!-- PRICE -->
-
-        <div class="input-group">
+        <div class="products-input-group">
 
             <i class='bx bx-money'></i>
 
@@ -412,15 +683,12 @@ $products = $pdo->query("
                 name="price"
                 placeholder="Giá gốc"
                 required
-
                 value="<?= $editProduct['price'] ?? '' ?>"
             >
 
         </div>
 
-        <!-- SALE PRICE -->
-
-        <div class="input-group">
+        <div class="products-input-group">
 
             <i class='bx bx-purchase-tag'></i>
 
@@ -428,32 +696,29 @@ $products = $pdo->query("
                 type="number"
                 name="sale_price"
                 placeholder="Giá khuyến mãi"
-
                 value="<?= $editProduct['sale_price'] ?? '' ?>"
             >
 
         </div>
 
-        <!-- RATING -->
-
-        <div class="input-group">
+        <div class="products-input-group">
 
             <i class='bx bx-star'></i>
 
             <input 
                 type="number"
                 step="0.1"
+                min="1"
+                max="5"
                 name="rating_fake"
-                placeholder="Đánh giá giả"
-
-                value="<?= $editProduct['rating_fake'] ?? '' ?>"
+                placeholder="Đánh giá từ 1 → 5"
+                required
+                value="<?= $editProduct['rating_fake'] ?? '5' ?>"
             >
 
         </div>
 
-        <!-- DESCRIPTION -->
-
-        <div class="textarea-group">
+        <div class="products-textarea">
 
             <textarea 
                 name="description"
@@ -462,9 +727,7 @@ $products = $pdo->query("
 
         </div>
 
-        <!-- IMAGE -->
-
-        <div class="input-file">
+        <div class="products-file">
 
             <label>
 
@@ -475,54 +738,69 @@ $products = $pdo->query("
                 <input 
                     type="file"
                     name="image"
+                    id="productImageInput"
                     accept="image/*"
                 >
 
             </label>
 
+            <div class="products-preview">
+
+                <img 
+                    id="previewImage"
+
+                    src="<?= 
+                        !empty($editProduct['image']) 
+                        ? '../uploads/products/' . $editProduct['image']
+                        : 'https://placehold.co/400x250?text=Preview'
+                    ?>"
+                >
+
+            </div>
+
         </div>
 
-        <!-- BUTTON -->
+        <div class="products-submit">
 
-        <?php if($editProduct): ?>
+            <?php if($editProduct): ?>
 
-            <button 
-                type="submit"
-                name="update_product"
-            >
+                <button 
+                    type="submit"
+                    name="update_product"
+                >
 
-                <i class='bx bx-save'></i>
+                    <i class='bx bx-save'></i>
 
-                Cập nhật sản phẩm
+                    Cập nhật sản phẩm
 
-            </button>
+                </button>
 
-        <?php else: ?>
+            <?php else: ?>
 
-            <button 
-                type="submit"
-                name="add_product"
-            >
+                <button 
+                    type="submit"
+                    name="add_product"
+                >
 
-                <i class='bx bx-plus'></i>
+                    <i class='bx bx-plus'></i>
 
-                Thêm sản phẩm
+                    Thêm sản phẩm
 
-            </button>
+                </button>
 
-        <?php endif; ?>
+            <?php endif; ?>
+
+        </div>
 
     </form>
 
 </div>
 
-<!-- PRODUCT TABLE -->
+<div class="products-card">
 
-<div class="card">
+    <div class="products-table-wrapper">
 
-    <div class="table-wrapper">
-
-        <table>
+        <table class="products-table">
 
             <thead>
 
@@ -549,26 +827,21 @@ $products = $pdo->query("
                         <tr>
 
                             <td>
-
                                 #<?= $product['id'] ?>
-
                             </td>
 
                             <td>
 
-                                <div class="product-name">
+                                <div class="products-info">
 
                                     <img 
                                         src="../uploads/products/<?= $product['image'] ?>"
-                                        class="product-image"
                                     >
 
                                     <div>
 
                                         <strong>
-
                                             <?= htmlspecialchars($product['name']) ?>
-
                                         </strong>
 
                                     </div>
@@ -578,26 +851,20 @@ $products = $pdo->query("
                             </td>
 
                             <td>
-
                                 <?= $product['category_name'] ?>
-
                             </td>
 
-                            <td>
-
+                            <td class="products-price">
                                 <?= number_format($product['price']) ?>đ
-
                             </td>
 
-                            <td>
-
+                            <td class="products-sale">
                                 <?= number_format($product['sale_price']) ?>đ
-
                             </td>
 
                             <td>
 
-                                <div class="rating">
+                                <div class="products-rating">
 
                                     <i class='bx bxs-star'></i>
 
@@ -609,25 +876,20 @@ $products = $pdo->query("
 
                             <td>
 
-                                <div class="actions">
-
-                                    <!-- EDIT -->
+                                <div class="products-actions">
 
                                     <a 
                                         href="?page=products&edit=<?= $product['id'] ?>"
-                                        class="btn-edit"
+                                        class="products-edit"
                                     >
 
                                         <i class='bx bx-edit'></i>
 
                                     </a>
 
-                                    <!-- DELETE -->
-
                                     <a 
                                         href="?page=products&delete=<?= $product['id'] ?>"
-                                        class="btn-delete"
-
+                                        class="products-delete"
                                         onclick="return confirm('Xóa sản phẩm này?')"
                                     >
 
@@ -649,7 +911,7 @@ $products = $pdo->query("
 
                         <td colspan="7">
 
-                            <div class="empty-data">
+                            <div class="products-empty">
 
                                 <i class='bx bx-package'></i>
 
@@ -671,11 +933,9 @@ $products = $pdo->query("
 
     </div>
 
-    <!-- PAGINATION -->
-
     <?php if($totalPages > 1): ?>
 
-        <div class="pagination">
+        <div class="products-pagination">
 
             <?php if($pageNumber > 1): ?>
 
@@ -719,3 +979,26 @@ $products = $pdo->query("
     <?php endif; ?>
 
 </div>
+
+<script>
+
+const imageInput = document.getElementById('productImageInput');
+const previewImage = document.getElementById('previewImage');
+
+if(imageInput){
+
+    imageInput.addEventListener('change', function(event){
+
+        const file = event.target.files[0];
+
+        if(file){
+
+            previewImage.src = URL.createObjectURL(file);
+
+        }
+
+    });
+
+}
+
+</script>

@@ -1,5 +1,5 @@
 <?php
-
+require_once "../core/auth.php";
 require_once "../core/db.php";
 
 /*
