@@ -1,5 +1,5 @@
 <?php
-
+require_once "../core/auth.php";
 require_once "../core/db.php";
 
 /*
@@ -57,6 +57,11 @@ if (isset($_POST['update_status'])) {
         ],
 
         'confirmed' => [
+            'shipping',
+            'cancelled'
+        ],
+
+        'shipping' => [
             'delivered'
         ],
 
@@ -91,8 +96,12 @@ if (isset($_POST['update_status'])) {
         ]);
     }
 
-    header("Location: index.php?page=orders");
-    exit;
+  echo "
+<script>
+    window.location.href='index.php?page=orders';
+</script>
+";
+exit;
 }
 
 /*
@@ -229,6 +238,11 @@ $pendingOrders = $pdo->query("
     WHERE status = 'pending'
 ")->fetchColumn();
 
+$shippingOrders = $pdo->query("
+    SELECT COUNT(*) FROM orders
+    WHERE status = 'shipping'
+")->fetchColumn();
+
 $deliveredOrders = $pdo->query("
     SELECT COUNT(*) FROM orders
     WHERE status = 'delivered'
@@ -252,6 +266,8 @@ $statusLabels = [
 
     'confirmed' => 'Đã xác nhận',
 
+    'shipping' => 'Đang giao',
+
     'delivered' => 'Đã giao',
 
     'cancelled' => 'Đã hủy'
@@ -260,56 +276,325 @@ $statusLabels = [
 
 ?>
 
-<link rel="stylesheet" href="../assets/css/orders.css">
+<style>
 
-<div class="orders-page">
+.om-page{
+    padding:24px;
+    background:#f5f7fb;
+    min-height:100vh;
+}
 
-    <!-- HEADER -->
+.om-header{
+    margin-bottom:24px;
+}
 
-    <div class="page-header">
+.om-header h1{
+    font-size:32px;
+    font-weight:700;
+    color:#111827;
+    margin-bottom:8px;
+}
 
-        <div>
+.om-header p{
+    color:#6b7280;
+}
 
-            <h1>
+.om-dashboard{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    margin-bottom:24px;
+}
 
-                <i class='bx bxs-cart'></i>
+.om-card{
+    background:#fff;
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.05);
+}
 
-                Quản lý đơn hàng
+.om-icon{
+    width:52px;
+    height:52px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    margin-bottom:14px;
+    background:#111827;
+    color:#fff;
+}
 
-            </h1>
+.om-yellow{
+    background:#f59e0b;
+}
 
-            <p>
-                Theo dõi và xử lý đơn hàng khách đặt
-            </p>
+.om-blue{
+    background:#3b82f6;
+}
 
-        </div>
+.om-green{
+    background:#10b981;
+}
+
+.om-card h3{
+    font-size:15px;
+    color:#6b7280;
+    margin-bottom:10px;
+}
+
+.om-card p{
+    font-size:28px;
+    font-weight:700;
+    color:#111827;
+}
+
+.om-box{
+    background:#fff;
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.05);
+    margin-bottom:24px;
+}
+
+.om-filter{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+}
+
+.om-filter select,
+.om-filter input{
+    height:46px;
+    border:1px solid #d1d5db;
+    border-radius:12px;
+    padding:0 14px;
+    font-size:14px;
+}
+
+.om-filter button{
+    height:46px;
+    border:none;
+    border-radius:12px;
+    padding:0 18px;
+    background:#111827;
+    color:#fff;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.om-table-wrap{
+    overflow-x:auto;
+}
+
+.om-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.om-table thead{
+    background:#f3f4f6;
+}
+
+.om-table th{
+    padding:16px;
+    text-align:left;
+    font-size:14px;
+    color:#374151;
+}
+
+.om-table td{
+    padding:16px;
+    border-top:1px solid #e5e7eb;
+}
+
+.om-order-id{
+    font-weight:700;
+    color:#111827;
+}
+
+.om-customer{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.om-status{
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:600;
+}
+
+.om-status.pending{
+    background:#fef3c7;
+    color:#92400e;
+}
+
+.om-status.confirmed{
+    background:#dbeafe;
+    color:#1d4ed8;
+}
+
+.om-status.shipping{
+    background:#ede9fe;
+    color:#6d28d9;
+}
+
+.om-status.delivered{
+    background:#d1fae5;
+    color:#065f46;
+}
+
+.om-status.cancelled{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.om-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.om-view-btn{
+    width:40px;
+    height:40px;
+    border-radius:10px;
+    background:#111827;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+}
+
+.om-status-select{
+    height:40px;
+    border-radius:10px;
+    border:1px solid #d1d5db;
+    padding:0 10px;
+}
+
+.om-lock{
+    color:#9ca3af;
+    font-size:14px;
+}
+
+.om-empty{
+    text-align:center;
+    padding:40px 20px;
+}
+
+.om-empty i{
+    font-size:48px;
+    color:#9ca3af;
+    margin-bottom:10px;
+}
+
+.om-pagination{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.om-pagination a{
+    width:42px;
+    height:42px;
+    border-radius:10px;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    color:#111827;
+    font-weight:600;
+    box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+.om-pagination a.active{
+    background:#111827;
+    color:#fff;
+}
+
+@media(max-width:992px){
+
+    .om-dashboard{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:768px){
+
+    .om-page{
+        padding:14px;
+    }
+
+    .om-dashboard{
+        grid-template-columns:1fr;
+    }
+
+    .om-header h1{
+        font-size:24px;
+    }
+
+    .om-table th,
+    .om-table td{
+        padding:12px;
+        font-size:13px;
+    }
+
+    .om-filter{
+        flex-direction:column;
+    }
+
+    .om-filter select,
+    .om-filter input,
+    .om-filter button{
+        width:100%;
+    }
+
+}
+
+</style>
+
+<div class="om-page">
+
+    <div class="om-header">
+
+        <h1>
+            <i class='bx bxs-cart'></i>
+            Quản lý đơn hàng
+        </h1>
+
+        <p>
+            Theo dõi trạng thái đơn hàng khách đặt
+        </p>
 
     </div>
 
-    <!-- DASHBOARD -->
+    <div class="om-dashboard">
 
-    <div class="dashboard-grid">
+        <div class="om-card">
 
-        <div class="dashboard-card">
-
-            <div class="card-icon">
-
+            <div class="om-icon">
                 <i class='bx bx-receipt'></i>
-
             </div>
 
-            <h3>Tổng đơn hàng</h3>
+            <h3>Tổng đơn</h3>
 
             <p><?= $totalOrders ?></p>
 
         </div>
 
-        <div class="dashboard-card">
+        <div class="om-card">
 
-            <div class="card-icon yellow">
-
-                <i class='bx bx-time-five'></i>
-
+            <div class="om-icon om-yellow">
+                <i class='bx bx-time'></i>
             </div>
 
             <h3>Đang chờ</h3>
@@ -318,12 +603,22 @@ $statusLabels = [
 
         </div>
 
-        <div class="dashboard-card">
+        <div class="om-card">
 
-            <div class="card-icon green">
+            <div class="om-icon om-blue">
+                <i class='bx bx-package'></i>
+            </div>
 
+            <h3>Đang giao</h3>
+
+            <p><?= $shippingOrders ?></p>
+
+        </div>
+
+        <div class="om-card">
+
+            <div class="om-icon om-green">
                 <i class='bx bx-check-circle'></i>
-
             </div>
 
             <h3>Đã giao</h3>
@@ -332,27 +627,11 @@ $statusLabels = [
 
         </div>
 
-        <div class="dashboard-card">
-
-            <div class="card-icon black">
-
-                <i class='bx bx-wallet'></i>
-
-            </div>
-
-            <h3>Doanh thu</h3>
-
-            <p><?= number_format($totalRevenue) ?>đ</p>
-
-        </div>
-
     </div>
 
-    <!-- FILTER -->
+    <div class="om-box">
 
-    <div class="card">
-
-        <form method="GET" class="filter-form">
+        <form method="GET" class="om-filter">
 
             <input type="hidden" name="page" value="orders">
 
@@ -368,6 +647,10 @@ $statusLabels = [
 
                 <option value="confirmed">
                     Đã xác nhận
+                </option>
+
+                <option value="shipping">
+                    Đang giao
                 </option>
 
                 <option value="delivered">
@@ -390,7 +673,7 @@ $statusLabels = [
 
                 <i class='bx bx-filter-alt'></i>
 
-                Lọc đơn hàng
+                Lọc
 
             </button>
 
@@ -398,13 +681,11 @@ $statusLabels = [
 
     </div>
 
-    <!-- TABLE -->
+    <div class="om-box">
 
-    <div class="card">
+        <div class="om-table-wrap">
 
-        <div class="table-wrapper">
-
-            <table>
+            <table class="om-table">
 
                 <thead>
 
@@ -412,7 +693,7 @@ $statusLabels = [
 
                         <th>Mã đơn</th>
                         <th>Khách hàng</th>
-                        <th>Số điện thoại</th>
+                        <th>SĐT</th>
                         <th>Số món</th>
                         <th>Tổng tiền</th>
                         <th>Trạng thái</th>
@@ -441,6 +722,11 @@ $statusLabels = [
                                 ],
 
                                 'confirmed' => [
+                                    'shipping',
+                                    'cancelled'
+                                ],
+
+                                'shipping' => [
                                     'delivered'
                                 ],
 
@@ -456,7 +742,7 @@ $statusLabels = [
 
                                 <td>
 
-                                    <span class="order-id">
+                                    <span class="om-order-id">
 
                                         #<?= str_pad(
                                             $order['id'],
@@ -471,7 +757,7 @@ $statusLabels = [
 
                                 <td>
 
-                                    <div class="customer">
+                                    <div class="om-customer">
 
                                         <i class='bx bx-user'></i>
 
@@ -482,30 +768,24 @@ $statusLabels = [
                                 </td>
 
                                 <td>
-
                                     <?= $order['phone'] ?>
-
                                 </td>
 
                                 <td>
-
                                     <?= $order['total_items'] ?> món
-
                                 </td>
 
                                 <td>
 
                                     <strong>
-
                                         <?= number_format($order['total_price']) ?>đ
-
                                     </strong>
 
                                 </td>
 
                                 <td>
 
-                                    <span class="status <?= $order['status'] ?>">
+                                    <span class="om-status <?= $order['status'] ?>">
 
                                         <?= $statusLabels[$order['status']] ?>
 
@@ -524,20 +804,16 @@ $statusLabels = [
 
                                 <td>
 
-                                    <div class="actions">
-
-                                        <!-- DETAIL -->
+                                    <div class="om-actions">
 
                                         <a 
                                             href="invoice.php?id=<?= $order['id'] ?>"
-                                            class="btn-view"
+                                            class="om-view-btn"
                                         >
 
                                             <i class='bx bx-show'></i>
 
                                         </a>
-
-                                        <!-- STATUS UPDATE -->
 
                                         <?php if(count($allowedTransitions[$currentStatus]) > 0): ?>
 
@@ -551,7 +827,7 @@ $statusLabels = [
 
                                                 <select 
                                                     name="status"
-                                                    class="status-select"
+                                                    class="om-status-select"
                                                     onchange="this.form.submit()"
                                                 >
 
@@ -583,7 +859,7 @@ $statusLabels = [
 
                                         <?php else: ?>
 
-                                            <span class="locked-status">
+                                            <span class="om-lock">
 
                                                 <i class='bx bx-lock-alt'></i>
 
@@ -607,7 +883,7 @@ $statusLabels = [
 
                             <td colspan="8">
 
-                                <div class="empty-data">
+                                <div class="om-empty">
 
                                     <i class='bx bx-package'></i>
 
@@ -631,20 +907,16 @@ $statusLabels = [
 
     </div>
 
-    <!-- PAGINATION -->
-
     <?php if($totalPages > 1): ?>
 
-        <div class="pagination">
+        <div class="om-pagination">
 
             <?php if($pageNumber > 1): ?>
 
                 <a 
                     href="?page=orders&p=<?= $pageNumber - 1 ?>"
                 >
-
                     <i class='bx bx-chevron-left'></i>
-
                 </a>
 
             <?php endif; ?>
@@ -667,9 +939,7 @@ $statusLabels = [
                 <a 
                     href="?page=orders&p=<?= $pageNumber + 1 ?>"
                 >
-
                     <i class='bx bx-chevron-right'></i>
-
                 </a>
 
             <?php endif; ?>

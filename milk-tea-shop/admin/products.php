@@ -1,5 +1,5 @@
 <?php
-
+require_once "../core/auth.php";
 require_once "../core/db.php";
 
 $editData = null;
@@ -405,7 +405,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         </ul>
 
-    </div>
+</div>
 
     <!-- MAIN -->
 
