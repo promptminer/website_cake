@@ -101,9 +101,8 @@ if (isset($_POST['update_category'])) {
         ");
 
         $update->execute([$name, $id]);
-
-        header("Location: index.php?page=categories");
-        exit;
+echo "<script>window.location.href='index.php?page=categories';</script>";
+exit;
     }
 }
 

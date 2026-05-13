@@ -72,10 +72,31 @@ if (isset($_POST['place_order'])) {
     $finalTotal  = $totalPrice + $shippingFee;
 
     // Tạo đơn hàng
-    mysqli_query($conn, "
-        INSERT INTO orders(customer_name, phone, address, total_price, shipping_fee, status, created_at)
-        VALUES('$customerName', '$phone', '$address', '$finalTotal', '$shippingFee', 'pending', NOW())
-    ");
+    // Tạo đơn hàng
+$insertOrder = mysqli_query($conn, "
+    INSERT INTO orders(
+        customer_name,
+        phone,
+        address,
+        total_price,
+        shipping_fee,
+        status,
+        created_at
+    )
+    VALUES(
+        '$customerName',
+        '$phone',
+        '$address',
+        '$finalTotal',
+        '$shippingFee',
+        'pending',
+        NOW()
+    )
+");
+
+if(!$insertOrder){
+    die("Lỗi tạo đơn hàng: " . mysqli_error($conn));
+}
 
     $orderId = mysqli_insert_id($conn);
 
@@ -595,11 +616,11 @@ textarea.form-control {
                     </div>
 
                 </div>
-<div class="shipping-note">
+<div class="shipping-note" style="margin-top: 12px; display: block; font-size: 12px; color: var(--gray);">
 
     <i class="fa-solid fa-truck"></i>
 
-    <span>
+    <span >
         Lưu ý: đơn hàng trong phạm vi 2km phí ship là 7.000đ.
         Sau mỗi 2km tiếp theo sẽ cộng thêm 5.000đ phí giao hàng.
     </span>
