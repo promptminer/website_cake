@@ -122,6 +122,8 @@ if(!$insertOrder){
     // Xóa giỏ hàng
     mysqli_query($conn, "DELETE FROM cart_items WHERE cart_id = '$cartId'");
 
+    $_SESSION['last_order_id'] = $orderId;
+
     header("Location: success.php?order_id=" . $orderId);
     exit;
 }
