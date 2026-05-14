@@ -155,6 +155,10 @@ body{
     background:#fef3c7;
     color:#92400e;
 }
+.confirmed{
+    background:#ede9fe;
+    color:#6d28d9;
+}
 
 .shipping{
     background:#dbeafe;
@@ -271,7 +275,37 @@ body{
 
             <?php
 
-                $statusClass = $order['status'];
+                $statusClass = strtolower($order['status']);
+
+                $statusText = '';
+
+                switch(strtolower($order['status'])){
+
+                case 'pending':
+                    $statusText = 'Chờ xác nhận';
+                    break;
+
+                case 'confirmed':
+                    $statusText = 'Đã xác nhận';
+                    break;
+
+                case 'shipping':
+                    $statusText = 'Đang giao';
+                    break;
+
+                case 'delivered':
+                    $statusText = 'Đã giao';
+                    break;
+
+                case 'cancelled':
+                    $statusText = 'Đã hủy';
+                    break;
+
+                default:
+                    $statusText = $order['status'];
+                    break;
+
+            }
 
             ?>
 
@@ -292,7 +326,7 @@ body{
                     </div>
 
                     <div class="status <?= $statusClass ?>">
-                        <?= $order['status'] ?>
+                        <?= $statusText ?>
                     </div>
 
                 </div>
