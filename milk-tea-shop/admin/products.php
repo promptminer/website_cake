@@ -25,8 +25,7 @@ $categories = $categoryQuery->fetchAll(PDO::FETCH_ASSOC);
 | ADD PRODUCT
 |--------------------------------------------------------------------------
 */
-
-if(isset($_POST['add_product'])){
+if (isset($_POST['add_product'])) {
 
     $name = trim($_POST['name']);
 
@@ -34,9 +33,7 @@ if(isset($_POST['add_product'])){
 
     $price = $_POST['price'];
 
-    $sale_price = !empty($_POST['sale_price'])
-        ? $_POST['sale_price']
-        : null;
+    $salePrice = 0;
 
     $description = trim($_POST['description']);
 
@@ -130,7 +127,25 @@ if(isset($_GET['delete'])){
 
     $id = (int) $_GET['delete'];
 
-    $getImage = $pdo->prepare("
+    $categoryId = (int) $_POST['category_id'];
+
+    $price = $_POST['price'];
+
+    $salePrice = 0;
+
+    $description = trim($_POST['description']);
+
+    $rating = (float) $_POST['rating_fake'];
+
+    if($rating < 1){
+        $rating = 1;
+    }
+
+    if($rating > 5){
+        $rating = 5;
+    }
+
+    $stmt = $pdo->prepare("
         SELECT image
         FROM products
         WHERE id=?
@@ -470,20 +485,38 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                         </select>
 
-                        <input
-                            type="number"
-                            name="price"
-                            placeholder="Giá"
-                            required
-                            value="<?= $editData['price'] ?>"
-                        >
+        </div>
 
-                        <input
-                            type="number"
-                            name="sale_price"
-                            placeholder="Giá khuyến mãi"
-                            value="<?= $editData['sale_price'] ?>"
-                        >
+        <div class="products-input-group">
+
+            <i class='bx bx-money'></i>
+
+            <input 
+                type="number"
+                name="price"
+                placeholder="Giá gốc"
+                required
+                value="<?= $editProduct['price'] ?? '' ?>"
+            >
+
+        </div>
+
+        <!-- <div class="products-input-group">
+
+            <i class='bx bx-purchase-tag'></i>
+
+            <input 
+                type="number"
+                name="sale_price"
+                placeholder="Giá khuyến mãi"
+                value="<?= $editProduct['sale_price'] ?? '' ?>"
+            >
+
+        </div> -->
+
+        <div class="products-input-group">
+
+            <i class='bx bx-star'></i>
 
                         <input
                             type="number"
@@ -523,127 +556,94 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 <?php else: ?>
 
-                    <form
-                        method="POST"
-                        enctype="multipart/form-data"
-                    >
+                <button 
+                    type="submit"
+                    name="add_product"
+                >
 
-                        <input
-                            type="text"
-                            name="name"
-                            placeholder="Tên sản phẩm"
-                            required
-                        >
+                    <i class='bx bx-plus'></i>
 
-                        <select
-                            name="category_id"
-                            required
-                        >
+                    Thêm sản phẩm
 
-                            <option value="">
-                                Chọn danh mục
-                            </option>
+                </button>
 
-                            <?php foreach($categories as $category): ?>
+            <?php endif; ?>
 
-                                <option value="<?= $category['id'] ?>">
-                                    <?= htmlspecialchars($category['name']) ?>
-                                </option>
+        </div>
 
-                            <?php endforeach; ?>
+    </form>
 
-                        </select>
+</div>
 
-                        <input
-                            type="number"
-                            name="price"
-                            placeholder="Giá"
-                            required
-                        >
+<div class="products-card">
 
-                        <input
-                            type="number"
-                            name="sale_price"
-                            placeholder="Giá khuyến mãi"
-                        >
+    <div class="products-table-wrapper">
 
-                        <input
-                            type="number"
-                            step="0.1"
-                            name="rating_fake"
-                            placeholder="Rating giả"
-                            value="4.5"
-                        >
+        <table class="products-table">
 
-                        <textarea
-                            name="description"
-                            placeholder="Mô tả sản phẩm"
-                        ></textarea>
+            <thead>
 
-                        <input
-                            type="file"
-                            name="image"
-                            accept="image/*"
-                            onchange="previewImage(event)"
-                            required
-                        >
+                <tr>
 
-                        <img
-                            id="preview"
-                            class="preview-image"
-                            style="display:none;"
-                        >
+                    <th>ID</th>
+                    <th>Sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Giá</th>
+                    <!-- <th>Khuyến mãi</th> -->
+                    <th>Rating</th>
+                    <th>Hành động</th>
 
-                        <button
-                            type="submit"
-                            name="add_product"
-                            class="btn-add"
-                        >
-                            Thêm sản phẩm
-                        </button>
+                </tr>
 
-                    </form>
+            </thead>
 
-                <?php endif; ?>
+            <tbody>
 
-            </div>
+                <?php if(count($products) > 0): ?>
 
-            <!-- PRODUCT GRID -->
+                    <?php foreach($products as $product): ?>
 
-            <?php if(count($products) > 0): ?>
+                        <tr>
 
-                <div class="product-grid">
+                            <td>
+                                #<?= $product['id'] ?>
+                            </td>
 
-                    <?php foreach($products as $item): ?>
+                            <td>
 
-                        <div class="product-card">
+                                <div class="products-info">
 
-                            <img
-                                src="../uploads/products/<?= $item['image'] ?>"
-                                alt="<?= htmlspecialchars($item['name']) ?>"
-                            >
+                                    <img 
+                                        src="../uploads/products/<?= $product['image'] ?>"
+                                    >
 
-                            <div class="product-content">
+                                    <div>
 
-                                <h3>
-                                    <?= htmlspecialchars($item['name']) ?>
-                                </h3>
+                                        <strong>
+                                            <?= htmlspecialchars($product['name']) ?>
+                                        </strong>
 
-                                <p class="category">
-                                    <?= htmlspecialchars($item['category_name']) ?>
-                                </p>
+                                    </div>
 
-                                <div class="price-box">
+                                </div>
 
-                                    <span class="price">
-                                        <?= number_format($item['price']) ?>đ
-                                    </span>
+                            </td>
 
-                                    <?php if(!empty($item['sale_price'])): ?>
+                            <td>
+                                <?= $product['category_name'] ?>
+                            </td>
 
-                                        <span class="sale-price">
-                                            <?= number_format($item['sale_price']) ?>đ
-                                        </span>
+                            <td class="products-price">
+                                <?= number_format($product['price']) ?>đ
+                            </td>
+
+                            
+
+                            <td>
+
+                                <div class="products-rating">
+
+                                    <i class='bx bxs-star'></i>
 
                                     <?php endif; ?>
 
