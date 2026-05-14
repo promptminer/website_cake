@@ -471,6 +471,25 @@ if($categoryId > 0){
     background:#111827 !important;
     color:white !important;
 }
+.orders-button{
+    height:48px;
+    padding:0 18px;
+    border-radius:14px;
+    background:white;
+    border:1px solid #e5e7eb;
+    color:#111827;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    font-weight:600;
+    transition:.2s;
+}
+
+.orders-button:hover{
+    background:#111827;
+    color:white;
+}
 </style>
 
 </head>
@@ -488,11 +507,18 @@ if($categoryId > 0){
                 <div style="display:flex;align-items:center;gap:12px;">
 
             <!-- NÚT ADMIN -->
-            <a href="./admin/login.php" class="admin-button">
+                <a href="./admin/login.php" class="admin-button">
 
-                <i class="fa-solid fa-user-shield"></i>
+                    <i class="fa-solid fa-user-shield"></i>
 
-            </a>
+                </a>
+               <a href="./my-orders.php" class="orders-button">
+
+    <i class="fa-solid fa-receipt"></i>
+
+    <span>Đơn hàng</span>
+
+</a>
 
                 <a href="./cart.php" class="cart-button">
 
