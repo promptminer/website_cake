@@ -117,7 +117,7 @@ if($categoryId > 0){
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Tiệm Trà Sữa X</title>
+<title>Arpina coffee and bakery</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -181,7 +181,7 @@ if($categoryId > 0){
     }
 
     .logo{
-        font-size:22px;
+        font-size:18px;
         font-weight:700;
     }
 
@@ -483,7 +483,7 @@ if($categoryId > 0){
             <div class="header-wrapper">
 
                 <a href="#" class="logo">
-                    Tiệm Trà Sữa X
+                    Arpina coffee and bakery
                 </a>
                 <div style="display:flex;align-items:center;gap:12px;">
 
@@ -652,7 +652,7 @@ if($categoryId > 0){
     <footer class="footer">
 
         <div class="container">
-            © 2026 Tiệm Trà Sữa X
+            © 2026 Arpina coffee and bakery
         </div>
 
     </footer>
