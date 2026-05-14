@@ -559,54 +559,6 @@ $statusLabels = [
     }
 
 }
-.om-table{
-        min-width:700px;
-    }
-
-    .om-status{
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        white-space:nowrap;
-        padding:7px 12px;
-        font-size:12px;
-    }
-
-    .om-actions{
-        flex-direction:column;
-        align-items:stretch;
-        gap:8px;
-        min-width:120px;
-    }
-
-    .om-actions form{
-        width:100%;
-    }
-
-    .om-status-select{
-        width:100%;
-        font-size:12px;
-        height:38px;
-    }
-
-    .om-view-btn{
-        width:100%;
-        height:38px;
-        border-radius:8px;
-    }
-
-    .om-lock{
-        font-size:12px;
-        text-align:center;
-    }
-
-    .om-table td{
-        white-space:nowrap;
-    }
-
-    .om-customer{
-        min-width:140px;
-    }
 
 </style>
 

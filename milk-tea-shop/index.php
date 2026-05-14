@@ -2,30 +2,18 @@
 
 session_start();
 
-/*
-|---------------------------------------------------
-| FILTER CATEGORY
-|---------------------------------------------------
-*/
+$host     = "localhost";
+$user     = "root";
+$password = "mysql";
+$database = "milk_tea_shop";
 
-$categoryId = isset($_GET['category'])
-    ? (int)$_GET['category']
-    : 0;
+$conn = mysqli_connect($host, $user, $password, $database);
 
+if (!$conn) {
+    die("Kết nối database thất bại");
+}
 
-
-    $host     = "localhost";
-    $user     = "root";
-    $password = "mysql";
-    $database = "milk_tea_shop";
-
-    $conn = mysqli_connect($host, $user, $password, $database);
-
-    if (!$conn) {
-        die("Kết nối database thất bại");
-    }
-
-    mysqli_set_charset($conn, "utf8");
+mysqli_set_charset($conn, "utf8");
 
 /*
 |---------------------------------------------------
@@ -33,49 +21,49 @@ $categoryId = isset($_GET['category'])
 |---------------------------------------------------
 */
 
-    $sessionId = session_id();
+$sessionId = session_id();
 
-    /*
-    |---------------------------------------------------
-    | TẠO GIỎ HÀNG NẾU CHƯA CÓ
-    |---------------------------------------------------
-    */
+/*
+|---------------------------------------------------
+| TẠO GIỎ HÀNG NẾU CHƯA CÓ
+|---------------------------------------------------
+*/
 
-    $getCart = mysqli_query($conn, "
-        SELECT id
-        FROM carts
-        WHERE session_id = '$sessionId'
-        LIMIT 1
+$getCart = mysqli_query($conn, "
+    SELECT id
+    FROM carts
+    WHERE session_id = '$sessionId'
+    LIMIT 1
+");
+
+$cart = mysqli_fetch_assoc($getCart);
+
+if (!$cart) {
+
+    mysqli_query($conn, "
+        INSERT INTO carts(session_id)
+        VALUES('$sessionId')
     ");
 
-    $cart = mysqli_fetch_assoc($getCart);
+    $cartId = mysqli_insert_id($conn);
 
-    if (!$cart) {
+} else {
 
-        mysqli_query($conn, "
-            INSERT INTO carts(session_id)
-            VALUES('$sessionId')
-        ");
+    $cartId = $cart['id'];
 
-        $cartId = mysqli_insert_id($conn);
+}
 
-    } else {
+/*
+|---------------------------------------------------
+| CATEGORY
+|---------------------------------------------------
+*/
 
-        $cartId = $cart['id'];
-
-    }
-
-    /*
-    |---------------------------------------------------
-    | CATEGORY
-    |---------------------------------------------------
-    */
-
-    $categories = mysqli_query($conn, "
-        SELECT *
-        FROM categories
-        ORDER BY id DESC
-    ");
+$categories = mysqli_query($conn, "
+    SELECT *
+    FROM categories
+    ORDER BY id DESC
+");
 
 /*
 |---------------------------------------------------
@@ -83,34 +71,16 @@ $categoryId = isset($_GET['category'])
 |---------------------------------------------------
 */
 
-if($categoryId > 0){
-
-    $products = mysqli_query($conn, "
-        SELECT 
-            p.*,
-            c.name as category_name,
-            pr.discount_percent
-        FROM products p
-        LEFT JOIN categories c ON p.category_id = c.id
-        LEFT JOIN promotions pr ON p.promotion_id = pr.id
-        WHERE p.category_id = '$categoryId'
-        ORDER BY p.id DESC
-    ");
-
-}else{
-
-    $products = mysqli_query($conn, "
-        SELECT 
-            p.*,
-            c.name as category_name,
-            pr.discount_percent
-        FROM products p
-        LEFT JOIN categories c ON p.category_id = c.id
-        LEFT JOIN promotions pr ON p.promotion_id = pr.id
-        ORDER BY p.id DESC
-    ");
-
-}
+$products = mysqli_query($conn, "
+    SELECT 
+        p.*,
+        c.name as category_name,
+        pr.discount_percent
+    FROM products p
+    LEFT JOIN categories c ON p.category_id = c.id
+    LEFT JOIN promotions pr ON p.promotion_id = pr.id
+    ORDER BY p.id DESC
+");
 
 ?>
 
@@ -471,10 +441,6 @@ if($categoryId > 0){
 #toast.error{
     background:#dc2626;
 }
-.active-category{
-    background:#111827 !important;
-    color:white !important;
-}
 
 </style>
 
@@ -541,18 +507,15 @@ if($categoryId > 0){
         <!-- DANH MỤC -->
         <div class="category-list">
 
-            <a href="./index.php"
-                class="category-item <?= $categoryId == 0 ? 'active-category' : '' ?>">
-                    Tất cả
+            <a href="#" class="category-item">
+                Tất cả
             </a>
 
             <?php if($categories && mysqli_num_rows($categories) > 0): ?>
 
                 <?php while($category = mysqli_fetch_assoc($categories)): ?>
 
-                    <a
-                        href="./index.php?category=<?= $category['id'] ?>"
-                        class="category-item <?= $categoryId == $category['id'] ? 'active-category' : '' ?>" >
+                    <a href="#" class="category-item">
                         <?= $category['name'] ?>
                     </a>
 

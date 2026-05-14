@@ -2,23 +2,53 @@
 require_once "../core/auth.php";
 require_once "../core/db.php";
 
-$editData = null;
-
-$currentPage = basename($_SERVER['PHP_SELF']);
-
 /*
 |--------------------------------------------------------------------------
-| GET CATEGORIES
+| DELETE PRODUCT
 |--------------------------------------------------------------------------
 */
 
-$categoryQuery = $pdo->query("
-    SELECT *
-    FROM categories
-    ORDER BY id DESC
-");
+if (isset($_GET['delete'])) {
 
-$categories = $categoryQuery->fetchAll(PDO::FETCH_ASSOC);
+    $id = (int) $_GET['delete'];
+
+    $delete = $pdo->prepare("
+        DELETE FROM products
+        WHERE id = ?
+    ");
+
+    $delete->execute([$id]);
+
+    echo "
+    <script>
+    window.location.href='index.php?page=products';
+    </script>
+    ";
+    exit;
+}
+
+/*
+|--------------------------------------------------------------------------
+| EDIT MODE
+|--------------------------------------------------------------------------
+*/
+
+$editProduct = null;
+
+if (isset($_GET['edit'])) {
+
+    $editId = (int) $_GET['edit'];
+
+    $stmt = $pdo->prepare("
+        SELECT *
+        FROM products
+        WHERE id = ?
+    ");
+
+    $stmt->execute([$editId]);
+
+    $editProduct = $stmt->fetch(PDO::FETCH_ASSOC);
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -26,64 +56,55 @@ $categories = $categoryQuery->fetchAll(PDO::FETCH_ASSOC);
 |--------------------------------------------------------------------------
 */
 
-if(isset($_POST['add_product'])){
+if (isset($_POST['add_product'])) {
 
     $name = trim($_POST['name']);
 
-    $category_id = (int) $_POST['category_id'];
+    $categoryId = (int) $_POST['category_id'];
 
     $price = $_POST['price'];
 
-    $sale_price = !empty($_POST['sale_price'])
-        ? $_POST['sale_price']
-        : null;
+    $salePrice = $_POST['sale_price'];
 
     $description = trim($_POST['description']);
 
-    $rating_fake = !empty($_POST['rating_fake'])
-        ? $_POST['rating_fake']
-        : 4.5;
+    $rating = (float) $_POST['rating_fake'];
 
-    $imageName = "";
-
-    if(
-        isset($_FILES['image'])
-        &&
-        $_FILES['image']['error'] == 0
-    ){
-
-        $tmpName = $_FILES['image']['tmp_name'];
-
-        $extension = strtolower(
-            pathinfo(
-                $_FILES['image']['name'],
-                PATHINFO_EXTENSION
-            )
-        );
-
-        $allow = ['jpg', 'jpeg', 'png', 'webp'];
-
-        if(
-            in_array($extension, $allow)
-            &&
-            $_FILES['image']['size'] <= 2 * 1024 * 1024
-        ){
-
-            $imageName =
-                time()
-                . '_'
-                . uniqid()
-                . '.'
-                . $extension;
-
-            move_uploaded_file(
-                $tmpName,
-                "../uploads/products/" . $imageName
-            );
-        }
+    if($rating < 1){
+        $rating = 1;
     }
 
-    $sql = "
+    if($rating > 5){
+        $rating = 5;
+    }
+
+    $image = "";
+
+    if (
+        isset($_FILES['image']) &&
+        $_FILES['image']['name'] != ""
+    ) {
+
+        if (!is_dir("../uploads/products")) {
+
+            mkdir(
+                "../uploads/products",
+                0777,
+                true
+            );
+        }
+
+        $image = time() . "_" . basename(
+            $_FILES['image']['name']
+        );
+
+        move_uploaded_file(
+            $_FILES['image']['tmp_name'],
+            "../uploads/products/" . $image
+        );
+    }
+
+    $insert = $pdo->prepare("
         INSERT INTO products(
             name,
             category_id,
@@ -94,101 +115,26 @@ if(isset($_POST['add_product'])){
             rating_fake
         )
         VALUES(
-            ?,
-            ?,
-            ?,
-            ?,
-            ?,
-            ?,
-            ?
+            ?, ?, ?, ?, ?, ?, ?
         )
-    ";
-
-    $stmt = $pdo->prepare($sql);
-
-    $stmt->execute([
-        $name,
-        $category_id,
-        $price,
-        $sale_price,
-        $imageName,
-        $description,
-        $rating_fake
-    ]);
-
-    header("Location: products.php");
-    exit;
-}
-
-/*
-|--------------------------------------------------------------------------
-| DELETE PRODUCT
-|--------------------------------------------------------------------------
-*/
-
-if(isset($_GET['delete'])){
-
-    $id = (int) $_GET['delete'];
-
-    $getImage = $pdo->prepare("
-        SELECT image
-        FROM products
-        WHERE id=?
     ");
 
-    $getImage->execute([$id]);
+    $insert->execute([
+        $name,
+        $categoryId,
+        $price,
+        $salePrice,
+        $image,
+        $description,
+        $rating
+    ]);
 
-    $imageData = $getImage->fetch(PDO::FETCH_ASSOC);
-
-    if(
-        $imageData
-        &&
-        !empty($imageData['image'])
-    ){
-
-        $imagePath =
-            "../uploads/products/"
-            . $imageData['image'];
-
-        if(file_exists($imagePath)){
-            unlink($imagePath);
-        }
-    }
-
-    $sql = "
-        DELETE FROM products
-        WHERE id=?
+    echo "
+    <script>
+    window.location.href='index.php?page=products';
+    </script>
     ";
-
-    $stmt = $pdo->prepare($sql);
-
-    $stmt->execute([$id]);
-
-    header("Location: products.php");
     exit;
-}
-
-/*
-|--------------------------------------------------------------------------
-| EDIT PRODUCT
-|--------------------------------------------------------------------------
-*/
-
-if(isset($_GET['edit'])){
-
-    $id = (int) $_GET['edit'];
-
-    $sql = "
-        SELECT *
-        FROM products
-        WHERE id=?
-    ";
-
-    $stmt = $pdo->prepare($sql);
-
-    $stmt->execute([$id]);
-
-    $editData = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
 /*
@@ -197,107 +143,142 @@ if(isset($_GET['edit'])){
 |--------------------------------------------------------------------------
 */
 
-if(isset($_POST['update_product'])){
+if (isset($_POST['update_product'])) {
 
-    $id = (int) $_POST['id'];
+    $id = (int) $_POST['product_id'];
 
     $name = trim($_POST['name']);
 
-    $category_id = (int) $_POST['category_id'];
+    $categoryId = (int) $_POST['category_id'];
 
     $price = $_POST['price'];
 
-    $sale_price = !empty($_POST['sale_price'])
-        ? $_POST['sale_price']
-        : null;
+    $salePrice = $_POST['sale_price'];
 
     $description = trim($_POST['description']);
 
-    $rating_fake = !empty($_POST['rating_fake'])
-        ? $_POST['rating_fake']
-        : 4.5;
+    $rating = (float) $_POST['rating_fake'];
 
-    $oldImage = $_POST['old_image'];
-
-    $imageName = $oldImage;
-
-    if(
-        isset($_FILES['image'])
-        &&
-        $_FILES['image']['error'] == 0
-    ){
-
-        $tmpName = $_FILES['image']['tmp_name'];
-
-        $extension = strtolower(
-            pathinfo(
-                $_FILES['image']['name'],
-                PATHINFO_EXTENSION
-            )
-        );
-
-        $allow = ['jpg', 'jpeg', 'png', 'webp'];
-
-        if(
-            in_array($extension, $allow)
-            &&
-            $_FILES['image']['size'] <= 2 * 1024 * 1024
-        ){
-
-            if(!empty($oldImage)){
-
-                $oldPath =
-                    "../uploads/products/"
-                    . $oldImage;
-
-                if(file_exists($oldPath)){
-                    unlink($oldPath);
-                }
-            }
-
-            $imageName =
-                time()
-                . '_'
-                . uniqid()
-                . '.'
-                . $extension;
-
-            move_uploaded_file(
-                $tmpName,
-                "../uploads/products/" . $imageName
-            );
-        }
+    if($rating < 1){
+        $rating = 1;
     }
 
-    $sql = "
+    if($rating > 5){
+        $rating = 5;
+    }
+
+    $stmt = $pdo->prepare("
+        SELECT image
+        FROM products
+        WHERE id = ?
+    ");
+
+    $stmt->execute([$id]);
+
+    $currentProduct = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $image = $currentProduct['image'];
+
+    if (
+        isset($_FILES['image']) &&
+        $_FILES['image']['name'] != ""
+    ) {
+
+        if (!is_dir("../uploads/products")) {
+
+            mkdir(
+                "../uploads/products",
+                0777,
+                true
+            );
+        }
+
+        $image = time() . "_" . basename(
+            $_FILES['image']['name']
+        );
+
+        move_uploaded_file(
+            $_FILES['image']['tmp_name'],
+            "../uploads/products/" . $image
+        );
+    }
+
+    $update = $pdo->prepare("
         UPDATE products
         SET
-            name=?,
-            category_id=?,
-            price=?,
-            sale_price=?,
-            image=?,
-            description=?,
-            rating_fake=?
-        WHERE id=?
-    ";
+            name = ?,
+            category_id = ?,
+            price = ?,
+            sale_price = ?,
+            image = ?,
+            description = ?,
+            rating_fake = ?
+        WHERE id = ?
+    ");
 
-    $stmt = $pdo->prepare($sql);
-
-    $stmt->execute([
+    $update->execute([
         $name,
-        $category_id,
+        $categoryId,
         $price,
-        $sale_price,
-        $imageName,
+        $salePrice,
+        $image,
         $description,
-        $rating_fake,
+        $rating,
         $id
     ]);
 
-    header("Location: products.php");
+    echo "
+    <script>
+    window.location.href='index.php?page=products';
+    </script>
+    ";
     exit;
 }
+
+/*
+|--------------------------------------------------------------------------
+| GET CATEGORIES
+|--------------------------------------------------------------------------
+*/
+
+$categories = $pdo->query("
+    SELECT *
+    FROM categories
+    ORDER BY id DESC
+")->fetchAll(PDO::FETCH_ASSOC);
+
+/*
+|--------------------------------------------------------------------------
+| PAGINATION
+|--------------------------------------------------------------------------
+*/
+
+$limit = 8;
+
+$pageNumber = isset($_GET['p'])
+    ? (int) $_GET['p']
+    : 1;
+
+if($pageNumber < 1){
+    $pageNumber = 1;
+}
+
+$offset = ($pageNumber - 1) * $limit;
+
+/*
+|--------------------------------------------------------------------------
+| TOTAL ROWS
+|--------------------------------------------------------------------------
+*/
+
+$totalRowsQuery = $pdo->query("
+    SELECT COUNT(*)
+    FROM products
+");
+
+$totalRows = $totalRowsQuery->fetchColumn();
+
+$totalPages = ceil($totalRows / $limit);
 
 /*
 |--------------------------------------------------------------------------
@@ -305,420 +286,719 @@ if(isset($_POST['update_product'])){
 |--------------------------------------------------------------------------
 */
 
-$sql = "
-    SELECT
+$products = $pdo->query("
+    SELECT 
         products.*,
         categories.name AS category_name
     FROM products
 
     LEFT JOIN categories
-    ON categories.id = products.category_id
+    ON products.category_id = categories.id
 
     ORDER BY products.id DESC
-";
 
-$stmt = $pdo->query($sql);
-
-$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    LIMIT $limit OFFSET $offset
+")->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 
-<!DOCTYPE html>
-<html lang="vi">
+<style>
 
-<head>
+.products-page-header{
+    margin-bottom:24px;
+}
 
-    <meta charset="UTF-8">
+.products-page-header h1{
+    font-size:28px;
+    margin-bottom:8px;
+    color:#111827;
+}
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+.products-page-header p{
+    color:#6b7280;
+}
 
-    <title>
+.products-card{
+    background:#fff;
+    border-radius:20px;
+    padding:24px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.05);
+    margin-bottom:24px;
+}
+
+.products-form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.products-input-group{
+    position:relative;
+}
+
+.products-input-group i{
+    position:absolute;
+    left:15px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#9ca3af;
+    font-size:20px;
+}
+
+.products-input-group input,
+.products-input-group select{
+    width:100%;
+    height:52px;
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    padding:0 16px 0 48px;
+    font-size:15px;
+    transition:0.25s;
+    background:#fff;
+}
+
+.products-input-group input:focus,
+.products-input-group select:focus,
+.products-textarea textarea:focus{
+    border-color:#f59e0b;
+    outline:none;
+}
+
+.products-textarea{
+    grid-column:1 / -1;
+}
+
+.products-textarea textarea{
+    width:100%;
+    min-height:130px;
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    padding:16px;
+    resize:none;
+    font-size:15px;
+}
+
+.products-file{
+    grid-column:1 / -1;
+}
+
+.products-file label{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#fff7ed;
+    color:#ea580c;
+    padding:16px;
+    border-radius:14px;
+    cursor:pointer;
+    font-weight:600;
+    border:2px dashed #fdba74;
+}
+
+.products-file input{
+    display:none;
+}
+
+.products-preview{
+    margin-top:18px;
+}
+
+.products-preview img{
+    width:100%;
+    max-width:350px;
+    height:230px;
+    object-fit:cover;
+    border-radius:18px;
+    border:2px solid #f1f5f9;
+    background:#f9fafb;
+    display:block;
+}
+
+.products-submit{
+    grid-column:1 / -1;
+}
+
+.products-submit button{
+    width:100%;
+    height:54px;
+    border:none;
+    border-radius:14px;
+    background:#f59e0b;
+    color:#fff;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    transition:0.25s;
+}
+
+.products-submit button:hover{
+    background:#d97706;
+}
+
+.products-table-wrapper{
+    overflow-x:auto;
+}
+
+.products-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.products-table th{
+    background:#f9fafb;
+    padding:15px;
+    text-align:left;
+    color:#6b7280;
+    font-size:14px;
+}
+
+.products-table td{
+    padding:16px 15px;
+    border-bottom:1px solid #f1f5f9;
+    vertical-align:middle;
+}
+
+.products-info{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    min-width:220px;
+}
+
+.products-info img{
+    width:70px;
+    height:70px;
+    object-fit:cover;
+    border-radius:16px;
+    background:#f3f4f6;
+}
+
+.products-price{
+    font-weight:700;
+    color:#111827;
+}
+
+.products-sale{
+    color:#dc2626;
+    font-weight:700;
+}
+
+.products-rating{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:#f59e0b;
+    font-weight:700;
+}
+
+.products-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.products-actions a{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:18px;
+    transition:0.25s;
+}
+
+.products-edit{
+    background:#2563eb;
+}
+
+.products-delete{
+    background:#dc2626;
+}
+
+.products-pagination{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+    margin-top:24px;
+    flex-wrap:wrap;
+}
+
+.products-pagination a{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#f3f4f6;
+    color:#111827;
+    font-weight:600;
+}
+
+.products-pagination a.active{
+    background:#f59e0b;
+    color:#fff;
+}
+
+.products-empty{
+    text-align:center;
+    padding:40px 20px;
+    color:#6b7280;
+}
+
+.products-empty i{
+    font-size:55px;
+    margin-bottom:10px;
+}
+
+@media(max-width:768px){
+
+    .products-form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .products-card{
+        padding:18px;
+    }
+
+    .products-page-header h1{
+        font-size:24px;
+    }
+
+    .products-table th,
+    .products-table td{
+        padding:12px 10px;
+        font-size:13px;
+    }
+
+    .products-info{
+        min-width:180px;
+    }
+
+    .products-info img{
+        width:55px;
+        height:55px;
+    }
+
+    .products-actions{
+        flex-direction:column;
+    }
+
+    .products-preview img{
+        max-width:100%;
+        height:200px;
+    }
+
+}
+
+</style>
+
+<div class="products-page-header">
+
+    <h1>
+        <i class='bx bxs-package'></i>
         Quản lí sản phẩm
-    </title>
+    </h1>
 
-    <link
-        rel="stylesheet"
-        href="../assets/css/admin.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
-
-</head>
-
-<body>
-
-<div class="admin-layout">
-
-    <!-- SIDEBAR -->
-
-    <div class="sidebar">
-
-        <div class="logo">
-            Milk Tea
-        </div>
-
-        <ul class="menu">
-
-            <li>
-                <a href="index.php">
-                    <i class="fa-solid fa-house"></i>
-                    Dashboard
-                </a>
-            </li>
-
-            <li>
-                <a href="categories.php">
-                    <i class="fa-solid fa-layer-group"></i>
-                    Danh mục
-                </a>
-            </li>
-
-            <li>
-                <a
-                    href="products.php"
-                    class="active"
-                >
-                    <i class="fa-solid fa-mug-hot"></i>
-                    Sản phẩm
-                </a>
-            </li>
-
-            <li>
-                <a href="orders.php">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    Đơn hàng
-                </a>
-            </li>
-
-            <li>
-                <a href="promotions.php">
-                    <i class="fa-solid fa-tags"></i>
-                    Khuyến mãi
-                </a>
-            </li>
-
-        </ul>
+    <p>
+        Quản lí menu trà sữa và bánh ngọt
+    </p>
 
 </div>
 
-    <!-- MAIN -->
+<div class="products-card">
 
-    <div class="main-content">
+    <form 
+        method="POST"
+        enctype="multipart/form-data"
+        class="products-form-grid"
+    >
 
-        <div class="container">
+        <?php if($editProduct): ?>
 
-            <!-- FORM -->
+            <input 
+                type="hidden"
+                name="product_id"
+                value="<?= $editProduct['id'] ?>"
+            >
 
-            <div class="card">
+        <?php endif; ?>
 
-                <h1>
-                    Quản lí sản phẩm
-                </h1>
+        <div class="products-input-group">
 
-                <?php if($editData): ?>
+            <i class='bx bx-coffee'></i>
 
-                    <form
-                        method="POST"
-                        enctype="multipart/form-data"
+            <input 
+                type="text"
+                name="name"
+                placeholder="Tên sản phẩm"
+                required
+                value="<?= $editProduct['name'] ?? '' ?>"
+            >
+
+        </div>
+
+        <div class="products-input-group">
+
+            <i class='bx bx-category'></i>
+
+            <select name="category_id" required>
+
+                <option value="">
+                    Chọn danh mục
+                </option>
+
+                <?php foreach($categories as $category): ?>
+
+                    <option 
+                        value="<?= $category['id'] ?>"
+
+                        <?= 
+                            isset($editProduct) &&
+                            $editProduct['category_id'] == $category['id']
+                            ? 'selected'
+                            : ''
+                        ?>
                     >
 
-                        <input
-                            type="hidden"
-                            name="id"
-                            value="<?= $editData['id'] ?>"
-                        >
+                        <?= $category['name'] ?>
 
-                        <input
-                            type="hidden"
-                            name="old_image"
-                            value="<?= $editData['image'] ?>"
-                        >
+                    </option>
 
-                        <input
-                            type="text"
-                            name="name"
-                            placeholder="Tên sản phẩm"
-                            required
-                            value="<?= htmlspecialchars($editData['name']) ?>"
-                        >
+                <?php endforeach; ?>
 
-                        <select
-                            name="category_id"
-                            required
-                        >
+            </select>
 
-                            <option value="">
-                                Chọn danh mục
-                            </option>
+        </div>
 
-                            <?php foreach($categories as $category): ?>
+        <div class="products-input-group">
 
-                                <option
-                                    value="<?= $category['id'] ?>"
-                                    <?= $editData['category_id'] == $category['id'] ? 'selected' : '' ?>
-                                >
-                                    <?= htmlspecialchars($category['name']) ?>
-                                </option>
+            <i class='bx bx-money'></i>
 
-                            <?php endforeach; ?>
+            <input 
+                type="number"
+                name="price"
+                placeholder="Giá gốc"
+                required
+                value="<?= $editProduct['price'] ?? '' ?>"
+            >
 
-                        </select>
+        </div>
 
-                        <input
-                            type="number"
-                            name="price"
-                            placeholder="Giá"
-                            required
-                            value="<?= $editData['price'] ?>"
-                        >
+        <div class="products-input-group">
 
-                        <input
-                            type="number"
-                            name="sale_price"
-                            placeholder="Giá khuyến mãi"
-                            value="<?= $editData['sale_price'] ?>"
-                        >
+            <i class='bx bx-purchase-tag'></i>
 
-                        <input
-                            type="number"
-                            step="0.1"
-                            name="rating_fake"
-                            placeholder="Rating"
-                            value="<?= $editData['rating_fake'] ?>"
-                        >
+            <input 
+                type="number"
+                name="sale_price"
+                placeholder="Giá khuyến mãi"
+                value="<?= $editProduct['sale_price'] ?? '' ?>"
+            >
 
-                        <textarea
-                            name="description"
-                            placeholder="Mô tả sản phẩm"
-                        ><?= htmlspecialchars($editData['description']) ?></textarea>
+        </div>
 
-                        <input
-                            type="file"
-                            name="image"
-                            accept="image/*"
-                            onchange="previewImage(event)"
-                        >
+        <div class="products-input-group">
 
-                        <img
-                            id="preview"
-                            class="preview-image"
-                            src="../uploads/products/<?= $editData['image'] ?>"
-                        >
+            <i class='bx bx-star'></i>
 
-                        <button
-                            type="submit"
-                            name="update_product"
-                            class="btn-add"
-                        >
-                            Cập nhật sản phẩm
-                        </button>
+            <input 
+                type="number"
+                step="0.1"
+                min="1"
+                max="5"
+                name="rating_fake"
+                placeholder="Đánh giá từ 1 → 5"
+                required
+                value="<?= $editProduct['rating_fake'] ?? '5' ?>"
+            >
 
-                    </form>
+        </div>
 
-                <?php else: ?>
+        <div class="products-textarea">
 
-                    <form
-                        method="POST"
-                        enctype="multipart/form-data"
-                    >
+            <textarea 
+                name="description"
+                placeholder="Mô tả sản phẩm"
+            ><?= $editProduct['description'] ?? '' ?></textarea>
 
-                        <input
-                            type="text"
-                            name="name"
-                            placeholder="Tên sản phẩm"
-                            required
-                        >
+        </div>
 
-                        <select
-                            name="category_id"
-                            required
-                        >
+        <div class="products-file">
 
-                            <option value="">
-                                Chọn danh mục
-                            </option>
+            <label>
 
-                            <?php foreach($categories as $category): ?>
+                <i class='bx bx-image-add'></i>
 
-                                <option value="<?= $category['id'] ?>">
-                                    <?= htmlspecialchars($category['name']) ?>
-                                </option>
+                <?= $editProduct ? 'Đổi ảnh sản phẩm' : 'Chọn ảnh sản phẩm' ?>
 
-                            <?php endforeach; ?>
+                <input 
+                    type="file"
+                    name="image"
+                    id="productImageInput"
+                    accept="image/*"
+                >
 
-                        </select>
+            </label>
 
-                        <input
-                            type="number"
-                            name="price"
-                            placeholder="Giá"
-                            required
-                        >
+            <div class="products-preview">
 
-                        <input
-                            type="number"
-                            name="sale_price"
-                            placeholder="Giá khuyến mãi"
-                        >
+                <img 
+                    id="previewImage"
 
-                        <input
-                            type="number"
-                            step="0.1"
-                            name="rating_fake"
-                            placeholder="Rating giả"
-                            value="4.5"
-                        >
-
-                        <textarea
-                            name="description"
-                            placeholder="Mô tả sản phẩm"
-                        ></textarea>
-
-                        <input
-                            type="file"
-                            name="image"
-                            accept="image/*"
-                            onchange="previewImage(event)"
-                            required
-                        >
-
-                        <img
-                            id="preview"
-                            class="preview-image"
-                            style="display:none;"
-                        >
-
-                        <button
-                            type="submit"
-                            name="add_product"
-                            class="btn-add"
-                        >
-                            Thêm sản phẩm
-                        </button>
-
-                    </form>
-
-                <?php endif; ?>
+                    src="<?= 
+                        !empty($editProduct['image']) 
+                        ? '../uploads/products/' . $editProduct['image']
+                        : 'https://placehold.co/400x250?text=Preview'
+                    ?>"
+                >
 
             </div>
 
-            <!-- PRODUCT GRID -->
+        </div>
 
-            <?php if(count($products) > 0): ?>
+        <div class="products-submit">
 
-                <div class="product-grid">
+            <?php if($editProduct): ?>
 
-                    <?php foreach($products as $item): ?>
+                <button 
+                    type="submit"
+                    name="update_product"
+                >
 
-                        <div class="product-card">
+                    <i class='bx bx-save'></i>
 
-                            <img
-                                src="../uploads/products/<?= $item['image'] ?>"
-                                alt="<?= htmlspecialchars($item['name']) ?>"
-                            >
+                    Cập nhật sản phẩm
 
-                            <div class="product-content">
-
-                                <h3>
-                                    <?= htmlspecialchars($item['name']) ?>
-                                </h3>
-
-                                <p class="category">
-                                    <?= htmlspecialchars($item['category_name']) ?>
-                                </p>
-
-                                <div class="price-box">
-
-                                    <span class="price">
-                                        <?= number_format($item['price']) ?>đ
-                                    </span>
-
-                                    <?php if(!empty($item['sale_price'])): ?>
-
-                                        <span class="sale-price">
-                                            <?= number_format($item['sale_price']) ?>đ
-                                        </span>
-
-                                    <?php endif; ?>
-
-                                </div>
-
-                                <p class="rating">
-                                    ⭐ <?= $item['rating_fake'] ?>
-                                </p>
-
-                                <div class="action">
-
-                                    <a
-                                        href="?edit=<?= $item['id'] ?>"
-                                        class="btn-edit"
-                                    >
-                                        Sửa
-                                    </a>
-
-                                    <a
-                                        href="?delete=<?= $item['id'] ?>"
-                                        class="btn-delete"
-                                        onclick="return confirm('Xóa sản phẩm này?')"
-                                    >
-                                        Xóa
-                                    </a>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    <?php endforeach; ?>
-
-                </div>
+                </button>
 
             <?php else: ?>
 
-                <div class="empty-product">
-                    Chưa có sản phẩm nào
-                </div>
+                <button 
+                    type="submit"
+                    name="add_product"
+                >
+
+                    <i class='bx bx-plus'></i>
+
+                    Thêm sản phẩm
+
+                </button>
 
             <?php endif; ?>
 
         </div>
 
+    </form>
+
+</div>
+
+<div class="products-card">
+
+    <div class="products-table-wrapper">
+
+        <table class="products-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+                    <th>Sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Giá</th>
+                    <th>Khuyến mãi</th>
+                    <th>Rating</th>
+                    <th>Hành động</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <?php if(count($products) > 0): ?>
+
+                    <?php foreach($products as $product): ?>
+
+                        <tr>
+
+                            <td>
+                                #<?= $product['id'] ?>
+                            </td>
+
+                            <td>
+
+                                <div class="products-info">
+
+                                    <img 
+                                        src="../uploads/products/<?= $product['image'] ?>"
+                                    >
+
+                                    <div>
+
+                                        <strong>
+                                            <?= htmlspecialchars($product['name']) ?>
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                            <td>
+                                <?= $product['category_name'] ?>
+                            </td>
+
+                            <td class="products-price">
+                                <?= number_format($product['price']) ?>đ
+                            </td>
+
+                            <td class="products-sale">
+                                <?= number_format($product['sale_price']) ?>đ
+                            </td>
+
+                            <td>
+
+                                <div class="products-rating">
+
+                                    <i class='bx bxs-star'></i>
+
+                                    <?= $product['rating_fake'] ?>
+
+                                </div>
+
+                            </td>
+
+                            <td>
+
+                                <div class="products-actions">
+
+                                    <a 
+                                        href="?page=products&edit=<?= $product['id'] ?>"
+                                        class="products-edit"
+                                    >
+
+                                        <i class='bx bx-edit'></i>
+
+                                    </a>
+
+                                    <a 
+                                        href="?page=products&delete=<?= $product['id'] ?>"
+                                        class="products-delete"
+                                        onclick="return confirm('Xóa sản phẩm này?')"
+                                    >
+
+                                        <i class='bx bx-trash'></i>
+
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    <?php endforeach; ?>
+
+                <?php else: ?>
+
+                    <tr>
+
+                        <td colspan="7">
+
+                            <div class="products-empty">
+
+                                <i class='bx bx-package'></i>
+
+                                <p>
+                                    Chưa có sản phẩm nào
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                <?php endif; ?>
+
+            </tbody>
+
+        </table>
+
     </div>
+
+    <?php if($totalPages > 1): ?>
+
+        <div class="products-pagination">
+
+            <?php if($pageNumber > 1): ?>
+
+                <a 
+                    href="?page=products&p=<?= $pageNumber - 1 ?>"
+                >
+
+                    <i class='bx bx-chevron-left'></i>
+
+                </a>
+
+            <?php endif; ?>
+
+            <?php for($i = 1; $i <= $totalPages; $i++): ?>
+
+                <a 
+                    href="?page=products&p=<?= $i ?>"
+                    class="<?= $i == $pageNumber ? 'active' : '' ?>"
+                >
+
+                    <?= $i ?>
+
+                </a>
+
+            <?php endfor; ?>
+
+            <?php if($pageNumber < $totalPages): ?>
+
+                <a 
+                    href="?page=products&p=<?= $pageNumber + 1 ?>"
+                >
+
+                    <i class='bx bx-chevron-right'></i>
+
+                </a>
+
+            <?php endif; ?>
+
+        </div>
+
+    <?php endif; ?>
 
 </div>
 
 <script>
 
-function previewImage(event){
+const imageInput = document.getElementById('productImageInput');
+const previewImage = document.getElementById('previewImage');
 
-    const file = event.target.files[0];
+if(imageInput){
 
-    if(!file) return;
+    imageInput.addEventListener('change', function(event){
 
-    const reader = new FileReader();
+        const file = event.target.files[0];
 
-    reader.onload = function(){
+        if(file){
 
-        const preview =
-            document.getElementById('preview');
+            previewImage.src = URL.createObjectURL(file);
 
-        preview.src = reader.result;
+        }
 
-        preview.style.display = 'block';
-    };
+    });
 
-    reader.readAsDataURL(file);
 }
 
 </script>
-
-</body>
-</html>
-

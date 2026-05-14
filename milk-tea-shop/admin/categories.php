@@ -2,12 +2,8 @@
 require_once "../core/auth.php";
 require_once "../core/db.php";
 
-$editData = null;
-
 $message = "";
-$messageType = "";
-
-$currentPage = basename($_SERVER['PHP_SELF']);
+$messageType = "success";
 
 /*
 |--------------------------------------------------------------------------
@@ -15,478 +11,602 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 |--------------------------------------------------------------------------
 */
 
-if(isset($_POST['add_category'])){
+if (isset($_POST['add_category'])) {
 
     $name = trim($_POST['name']);
 
-    if($name != ""){
+    if ($name != "") {
 
-        /*
-        |--------------------------------------------------------------------------
-        | CHECK EXISTS
-        |--------------------------------------------------------------------------
-        */
+        $check = $pdo->prepare("
+            SELECT id 
+            FROM categories 
+            WHERE name = ?
+        ");
 
-        $checkSql = "
-            SELECT id
-            FROM categories
-            WHERE LOWER(name) = LOWER(?)
-        ";
+        $check->execute([$name]);
 
-        $checkStmt = $pdo->prepare($checkSql);
-
-        $checkStmt->execute([$name]);
-
-        $categoryExists = $checkStmt->fetch();
-
-        /*
-        |--------------------------------------------------------------------------
-        | EXISTS
-        |--------------------------------------------------------------------------
-        */
-
-        if($categoryExists){
+        if ($check->rowCount() > 0) {
 
             $message = "Danh mục đã tồn tại";
-
             $messageType = "error";
 
-        }else{
+        } else {
 
-            /*
-            |--------------------------------------------------------------------------
-            | INSERT
-            |--------------------------------------------------------------------------
-            */
-
-            $sql = "
+            $insert = $pdo->prepare("
                 INSERT INTO categories(name)
                 VALUES(?)
-            ";
+            ");
 
-            $stmt = $pdo->prepare($sql);
+            $insert->execute([$name]);
 
-            $stmt->execute([$name]);
-
-            $message = "Thêm danh mục thành công";
-
-            $messageType = "success";
+         echo "<script>window.location.href='index.php?page=categories';</script>";
+exit;
         }
     }
 }
 
 /*
 |--------------------------------------------------------------------------
-| DELETE CATEGORY
+| DELETE
 |--------------------------------------------------------------------------
 */
 
-if(isset($_GET['delete'])){
+if (isset($_GET['delete'])) {
 
     $id = (int) $_GET['delete'];
 
-    $sql = "
+    $delete = $pdo->prepare("
         DELETE FROM categories
         WHERE id = ?
-    ";
+    ");
 
-    $stmt = $pdo->prepare($sql);
+    $delete->execute([$id]);
 
-    $stmt->execute([$id]);
-
-    header("Location: categories.php");
-
-    exit;
+   echo "<script>window.location.href='index.php?page=categories';</script>";
+exit;
 }
 
 /*
 |--------------------------------------------------------------------------
-| EDIT CATEGORY
+| UPDATE
 |--------------------------------------------------------------------------
 */
 
-if(isset($_GET['edit'])){
-
-    $id = (int) $_GET['edit'];
-
-    $sql = "
-        SELECT *
-        FROM categories
-        WHERE id = ?
-    ";
-
-    $stmt = $pdo->prepare($sql);
-
-    $stmt->execute([$id]);
-
-    $editData = $stmt->fetch(PDO::FETCH_ASSOC);
-}
-
-/*
-|--------------------------------------------------------------------------
-| UPDATE CATEGORY
-|--------------------------------------------------------------------------
-*/
-
-if(isset($_POST['update_category'])){
+if (isset($_POST['update_category'])) {
 
     $id = (int) $_POST['id'];
 
     $name = trim($_POST['name']);
 
-    /*
-    |--------------------------------------------------------------------------
-    | CHECK EXISTS UPDATE
-    |--------------------------------------------------------------------------
-    */
-
-    $checkSql = "
+    $check = $pdo->prepare("
         SELECT id
         FROM categories
-        WHERE LOWER(name) = LOWER(?)
+        WHERE name = ?
         AND id != ?
-    ";
+    ");
 
-    $checkStmt = $pdo->prepare($checkSql);
+    $check->execute([$name, $id]);
 
-    $checkStmt->execute([
-        $name,
-        $id
-    ]);
-
-    $categoryExists = $checkStmt->fetch();
-
-    /*
-    |--------------------------------------------------------------------------
-    | EXISTS
-    |--------------------------------------------------------------------------
-    */
-
-    if($categoryExists){
+    if ($check->rowCount() > 0) {
 
         $message = "Tên danh mục đã tồn tại";
-
         $messageType = "error";
 
-    }else{
+    } else {
 
-        /*
-        |--------------------------------------------------------------------------
-        | UPDATE
-        |--------------------------------------------------------------------------
-        */
-
-        $sql = "
+        $update = $pdo->prepare("
             UPDATE categories
             SET name = ?
             WHERE id = ?
-        ";
+        ");
 
-        $stmt = $pdo->prepare($sql);
-
-        $stmt->execute([
-            $name,
-            $id
-        ]);
-
-        $message = "Cập nhật danh mục thành công";
-
-        $messageType = "success";
-
-        /*
-        |--------------------------------------------------------------------------
-        | REFRESH EDIT DATA
-        |--------------------------------------------------------------------------
-        */
-
-        $sql = "
-            SELECT *
-            FROM categories
-            WHERE id = ?
-        ";
-
-        $stmt = $pdo->prepare($sql);
-
-        $stmt->execute([$id]);
-
-        $editData = $stmt->fetch(PDO::FETCH_ASSOC);
+        $update->execute([$name, $id]);
+echo "<script>window.location.href='index.php?page=categories';</script>";
+exit;
     }
 }
 
 /*
 |--------------------------------------------------------------------------
-| GET CATEGORIES
+| EDIT
 |--------------------------------------------------------------------------
 */
 
-$sql = "
+$editCategory = null;
+
+if (isset($_GET['edit'])) {
+
+    $id = (int) $_GET['edit'];
+
+    $stmt = $pdo->prepare("
+        SELECT *
+        FROM categories
+        WHERE id = ?
+    ");
+
+    $stmt->execute([$id]);
+
+    $editCategory = $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+/*
+|--------------------------------------------------------------------------
+| GET ALL
+|--------------------------------------------------------------------------
+*/
+
+$categories = $pdo->query("
     SELECT *
     FROM categories
     ORDER BY id DESC
-";
-
-$stmt = $pdo->query($sql);
-
-$categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+")->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 
-<!DOCTYPE html>
-<html lang="vi">
+<style>
 
-<head>
+.category-page{
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+}
 
-    <meta charset="UTF-8">
+.category-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    flex-wrap:wrap;
+}
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+.category-header h1{
+    font-size:30px;
+    font-weight:700;
+    color:#111827;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:8px;
+}
 
-    <title>
-        Quản lí danh mục
-    </title>
+.category-header h1 i{
+    color:#f59e0b;
+}
 
-    <link
-        rel="stylesheet"
-        href="../assets/css/admin.css"
-    >
+.category-header p{
+    color:#6b7280;
+    font-size:15px;
+}
 
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
+.category-alert{
+    padding:16px 18px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:14px;
+    font-weight:500;
+}
 
-</head>
+.category-alert.success{
+    background:#ecfdf5;
+    color:#059669;
+}
 
-<body>
+.category-alert.error{
+    background:#fef2f2;
+    color:#dc2626;
+}
 
-<div class="admin-layout">
+.category-card{
+    background:#fff;
+    border-radius:22px;
+    padding:24px;
+    box-shadow:0 4px 18px rgba(0,0,0,0.05);
+}
 
-    <!-- SIDEBAR -->
+.category-form{
+    display:flex;
+    gap:16px;
+    align-items:center;
+}
 
-    <div class="sidebar">
+.category-input{
+    flex:1;
+    position:relative;
+}
 
-        <div class="logo">
-            Milk Tea
+.category-input i{
+    position:absolute;
+    left:16px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#9ca3af;
+    font-size:20px;
+}
+
+.category-input input{
+    width:100%;
+    height:56px;
+    border:1px solid #e5e7eb;
+    border-radius:16px;
+    padding:0 18px 0 50px;
+    font-size:15px;
+    transition:0.25s;
+    outline:none;
+    background:#f9fafb;
+}
+
+.category-input input:focus{
+    border-color:#f59e0b;
+    background:#fff;
+}
+
+.category-submit{
+    height:56px;
+    border:none;
+    border-radius:16px;
+    background:#f59e0b;
+    color:#fff;
+    padding:0 24px;
+    font-size:15px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    cursor:pointer;
+    transition:0.25s;
+}
+
+.category-submit:hover{
+    background:#d97706;
+}
+
+.category-table-wrapper{
+    overflow-x:auto;
+}
+
+.category-table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:700px;
+}
+
+.category-table thead th{
+    background:#f9fafb;
+    padding:16px;
+    text-align:left;
+    color:#6b7280;
+    font-size:14px;
+    font-weight:600;
+}
+
+.category-table tbody td{
+    padding:18px 16px;
+    border-bottom:1px solid #f1f5f9;
+    font-size:14px;
+    vertical-align:middle;
+}
+
+.category-id{
+    font-weight:700;
+    color:#111827;
+}
+
+.category-name-box{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-weight:600;
+    color:#111827;
+}
+
+.category-dot{
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    background:#f59e0b;
+    flex-shrink:0;
+}
+
+.category-date{
+    color:#6b7280;
+}
+
+.category-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.category-btn{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+    transition:0.25s;
+}
+
+.category-btn-edit{
+    background:#eff6ff;
+    color:#2563eb;
+}
+
+.category-btn-edit:hover{
+    background:#2563eb;
+    color:#fff;
+}
+
+.category-btn-delete{
+    background:#fef2f2;
+    color:#dc2626;
+}
+
+.category-btn-delete:hover{
+    background:#dc2626;
+    color:#fff;
+}
+
+.category-empty{
+    padding:50px 20px;
+    text-align:center;
+}
+
+.category-empty i{
+    font-size:55px;
+    color:#d1d5db;
+    margin-bottom:14px;
+}
+
+.category-empty p{
+    color:#6b7280;
+    font-size:15px;
+}
+
+@media(max-width:768px){
+
+    .category-header h1{
+        font-size:24px;
+    }
+
+    .category-card{
+        padding:18px;
+        border-radius:18px;
+    }
+
+    .category-form{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .category-submit{
+        width:100%;
+        justify-content:center;
+    }
+
+    .category-table{
+        min-width:650px;
+    }
+
+}
+
+</style>
+
+<div class="category-page">
+
+    <div class="category-header">
+
+        <div>
+
+            <h1>
+                <i class='bx bxs-category'></i>
+                Quản lý danh mục
+            </h1>
+
+            <p>
+                Quản lý danh mục sản phẩm hệ thống
+            </p>
+
         </div>
-
-        <ul class="menu">
-
-            <li>
-                <a href="index.php">
-                    <i class="fa-solid fa-house"></i>
-                    Dashboard
-                </a>
-            </li>
-
-            <li>
-                <a
-                    href="categories.php"
-                    class="active"
-                >
-                    <i class="fa-solid fa-layer-group"></i>
-                    Danh mục
-                </a>
-            </li>
-
-            <li>
-                <a href="products.php">
-                    <i class="fa-solid fa-mug-hot"></i>
-                    Sản phẩm
-                </a>
-            </li>
-
-            <li>
-                <a href="orders.php">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    Đơn hàng
-                </a>
-            </li>
-
-            <li>
-                <a href="promotions.php">
-                    <i class="fa-solid fa-tags"></i>
-                    Khuyến mãi
-                </a>
-            </li>
-
-        </ul>
 
     </div>
 
-    <!-- MAIN -->
+    <?php if($message): ?>
 
-    <div class="main-content">
+        <div class="category-alert <?= $messageType ?>">
 
-        <div class="container">
+            <i class='bx bx-info-circle'></i>
 
-            <!-- FORM -->
+            <?= $message ?>
 
-            <div class="card">
+        </div>
 
-                <h1>
-                    Quản lí danh mục
-                </h1>
+    <?php endif; ?>
 
-                <?php if(!empty($message)): ?>
+    <div class="category-card">
 
-                    <div class="alert <?= $messageType ?>">
+        <?php if($editCategory): ?>
 
-                        <?= $message ?>
+            <form method="POST" class="category-form">
 
-                    </div>
+                <input 
+                    type="hidden"
+                    name="id"
+                    value="<?= $editCategory['id'] ?>"
+                >
 
-                <?php endif; ?>
+                <div class="category-input">
 
-                <?php if($editData): ?>
+                    <i class='bx bx-category'></i>
 
-                    <form method="POST">
+                    <input 
+                        type="text"
+                        name="name"
+                        value="<?= htmlspecialchars($editCategory['name']) ?>"
+                        placeholder="Nhập tên danh mục"
+                        required
+                    >
 
-                        <input
-                            type="hidden"
-                            name="id"
-                            value="<?= $editData['id'] ?>"
-                        >
+                </div>
 
-                        <input
-                            type="text"
-                            name="name"
-                            placeholder="Tên danh mục"
-                            required
-                            value="<?= htmlspecialchars($editData['name']) ?>"
-                        >
+                <button 
+                    type="submit" 
+                    name="update_category"
+                    class="category-submit"
+                >
 
-                        <button
-                            type="submit"
-                            name="update_category"
-                            class="btn-add"
-                        >
-                            Cập nhật danh mục
-                        </button>
+                    <i class='bx bx-save'></i>
+                    Cập nhật
 
-                    </form>
+                </button>
 
-                <?php else: ?>
+            </form>
 
-                    <form method="POST">
+        <?php else: ?>
 
-                        <input
-                            type="text"
-                            name="name"
-                            placeholder="Nhập tên danh mục"
-                            required
-                        >
+            <form method="POST" class="category-form">
 
-                        <button
-                            type="submit"
-                            name="add_category"
-                            class="btn-add"
-                        >
-                            Thêm danh mục
-                        </button>
+                <div class="category-input">
 
-                    </form>
+                    <i class='bx bx-category'></i>
 
-                <?php endif; ?>
+                    <input 
+                        type="text"
+                        name="name"
+                        placeholder="Nhập tên danh mục"
+                        required
+                    >
 
-            </div>
+                </div>
 
-            <!-- TABLE -->
+                <button 
+                    type="submit"
+                    name="add_category"
+                    class="category-submit"
+                >
 
-            <div class="card">
+                    <i class='bx bx-plus'></i>
+                    Thêm danh mục
 
-                <table>
+                </button>
 
-                    <thead>
+            </form>
 
-                        <tr>
+        <?php endif; ?>
 
-                            <th>ID</th>
+    </div>
 
-                            <th>Tên danh mục</th>
+    <div class="category-card">
 
-                            <th>Ngày tạo</th>
+        <div class="category-table-wrapper">
 
-                            <th>Hành động</th>
+            <table class="category-table">
 
-                        </tr>
+                <thead>
 
-                    </thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên danh mục</th>
+                        <th>Ngày tạo</th>
+                        <th>Hành động</th>
+                    </tr>
 
-                    <tbody>
+                </thead>
 
-                        <?php if(count($categories) > 0): ?>
+                <tbody>
 
-                            <?php foreach($categories as $item): ?>
+                    <?php if(count($categories) > 0): ?>
 
-                                <tr>
-
-                                    <td>
-                                        <?= $item['id'] ?>
-                                    </td>
-
-                                    <td>
-                                        <?= htmlspecialchars($item['name']) ?>
-                                    </td>
-
-                                    <td>
-                                        <?= $item['created_at'] ?>
-                                    </td>
-
-                                    <td>
-
-                                        <div class="action">
-
-                                            <a
-                                                href="?edit=<?= $item['id'] ?>"
-                                                class="btn-edit"
-                                            >
-                                                Sửa
-                                            </a>
-
-                                            <a
-                                                href="?delete=<?= $item['id'] ?>"
-                                                class="btn-delete"
-                                                onclick="return confirm('Xóa danh mục này?')"
-                                            >
-                                                Xóa
-                                            </a>
-
-                                        </div>
-
-                                    </td>
-
-                                </tr>
-
-                            <?php endforeach; ?>
-
-                        <?php else: ?>
+                        <?php foreach($categories as $category): ?>
 
                             <tr>
 
-                                <td
-                                    colspan="4"
-                                    style="text-align:center;"
-                                >
-                                    Chưa có danh mục nào
+                                <td>
+
+                                    <span class="category-id">
+                                        #<?= $category['id'] ?>
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <div class="category-name-box">
+
+                                        <span class="category-dot"></span>
+
+                                        <?= htmlspecialchars($category['name']) ?>
+
+                                    </div>
+
+                                </td>
+
+                                <td>
+
+                                    <span class="category-date">
+                                        <?= $category['created_at'] ?>
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <div class="category-actions">
+
+                                        <a 
+                                            href="index.php?page=categories&edit=<?= $category['id'] ?>"
+                                            class="category-btn category-btn-edit"
+                                        >
+                                            <i class='bx bx-edit'></i>
+                                        </a>
+
+                                        <a 
+                                            href="index.php?page=categories&delete=<?= $category['id'] ?>"
+                                            class="category-btn category-btn-delete"
+                                            onclick="return confirm('Xóa danh mục này?')"
+                                        >
+                                            <i class='bx bx-trash'></i>
+                                        </a>
+
+                                    </div>
+
                                 </td>
 
                             </tr>
 
-                        <?php endif; ?>
+                        <?php endforeach; ?>
 
-                    </tbody>
+                    <?php else: ?>
 
-                </table>
+                        <tr>
 
-            </div>
+                            <td colspan="4">
+
+                                <div class="category-empty">
+
+                                    <i class='bx bx-folder-open'></i>
+
+                                    <p>
+                                        Chưa có danh mục nào
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    <?php endif; ?>
+
+                </tbody>
+
+            </table>
 
         </div>
 
     </div>
 
 </div>
-
-</body>
-</html>
