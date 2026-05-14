@@ -99,7 +99,7 @@ foreach($orderItems as $item){
 |--------------------------------------------------------------------------
 */
 
-$shippingFee = 7000;
+$shippingFee = 5000; // Cố định 5.000đ phí ship
 
 /*
 |--------------------------------------------------------------------------
@@ -322,9 +322,7 @@ $statusLabels = [
 
                     <strong>
 
-                        <?= number_format(
-                            $shippingFee
-                        ) ?>đ
+                       .....
 
                     </strong>
 
@@ -346,8 +344,8 @@ $statusLabels = [
 
                     <p>
                         Đơn dưới 2km miễn phí vận chuyển.
-                        Trên 2km tính 7.000đ,
-                        sau đó mỗi 2km tiếp theo cộng thêm 7.000đ.
+                        Trên 2km tính 5000đ,
+                        sau đó mỗi 2km tiếp theo cộng thêm 5.000đ.
                     </p>
 
                 </div>
