@@ -14,18 +14,18 @@ $categoryId = isset($_GET['category'])
 
 
 
-$host     = "localhost";
-$user     = "root";
-$password = "mysql";
-$database = "milk_tea_shop";
+    $host     = "localhost";
+    $user     = "root";
+    $password = "mysql";
+    $database = "milk_tea_shop";
 
-$conn = mysqli_connect($host, $user, $password, $database);
+    $conn = mysqli_connect($host, $user, $password, $database);
 
-if (!$conn) {
-    die("Kết nối database thất bại");
-}
+    if (!$conn) {
+        die("Kết nối database thất bại");
+    }
 
-mysqli_set_charset($conn, "utf8");
+    mysqli_set_charset($conn, "utf8");
 
 /*
 |---------------------------------------------------
@@ -33,49 +33,49 @@ mysqli_set_charset($conn, "utf8");
 |---------------------------------------------------
 */
 
-$sessionId = session_id();
+    $sessionId = session_id();
 
-/*
-|---------------------------------------------------
-| TẠO GIỎ HÀNG NẾU CHƯA CÓ
-|---------------------------------------------------
-*/
+    /*
+    |---------------------------------------------------
+    | TẠO GIỎ HÀNG NẾU CHƯA CÓ
+    |---------------------------------------------------
+    */
 
-$getCart = mysqli_query($conn, "
-    SELECT id
-    FROM carts
-    WHERE session_id = '$sessionId'
-    LIMIT 1
-");
-
-$cart = mysqli_fetch_assoc($getCart);
-
-if (!$cart) {
-
-    mysqli_query($conn, "
-        INSERT INTO carts(session_id)
-        VALUES('$sessionId')
+    $getCart = mysqli_query($conn, "
+        SELECT id
+        FROM carts
+        WHERE session_id = '$sessionId'
+        LIMIT 1
     ");
 
-    $cartId = mysqli_insert_id($conn);
+    $cart = mysqli_fetch_assoc($getCart);
 
-} else {
+    if (!$cart) {
 
-    $cartId = $cart['id'];
+        mysqli_query($conn, "
+            INSERT INTO carts(session_id)
+            VALUES('$sessionId')
+        ");
 
-}
+        $cartId = mysqli_insert_id($conn);
 
-/*
-|---------------------------------------------------
-| CATEGORY
-|---------------------------------------------------
-*/
+    } else {
 
-$categories = mysqli_query($conn, "
-    SELECT *
-    FROM categories
-    ORDER BY id DESC
-");
+        $cartId = $cart['id'];
+
+    }
+
+    /*
+    |---------------------------------------------------
+    | CATEGORY
+    |---------------------------------------------------
+    */
+
+    $categories = mysqli_query($conn, "
+        SELECT *
+        FROM categories
+        ORDER BY id DESC
+    ");
 
 /*
 |---------------------------------------------------
