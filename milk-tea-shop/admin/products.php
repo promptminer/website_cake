@@ -55,7 +55,6 @@ if (isset($_GET['edit'])) {
 | ADD PRODUCT
 |--------------------------------------------------------------------------
 */
-
 if (isset($_POST['add_product'])) {
 
     $name = trim($_POST['name']);
@@ -64,7 +63,7 @@ if (isset($_POST['add_product'])) {
 
     $price = $_POST['price'];
 
-    $salePrice = $_POST['sale_price'];
+    $salePrice = 0;
 
     $description = trim($_POST['description']);
 
@@ -153,7 +152,7 @@ if (isset($_POST['update_product'])) {
 
     $price = $_POST['price'];
 
-    $salePrice = $_POST['sale_price'];
+    $salePrice = 0;
 
     $description = trim($_POST['description']);
 
@@ -688,7 +687,7 @@ $products = $pdo->query("
 
         </div>
 
-        <div class="products-input-group">
+        <!-- <div class="products-input-group">
 
             <i class='bx bx-purchase-tag'></i>
 
@@ -699,7 +698,7 @@ $products = $pdo->query("
                 value="<?= $editProduct['sale_price'] ?? '' ?>"
             >
 
-        </div>
+        </div> -->
 
         <div class="products-input-group">
 
@@ -810,7 +809,7 @@ $products = $pdo->query("
                     <th>Sản phẩm</th>
                     <th>Danh mục</th>
                     <th>Giá</th>
-                    <th>Khuyến mãi</th>
+                    <!-- <th>Khuyến mãi</th> -->
                     <th>Rating</th>
                     <th>Hành động</th>
 
@@ -858,9 +857,7 @@ $products = $pdo->query("
                                 <?= number_format($product['price']) ?>đ
                             </td>
 
-                            <td class="products-sale">
-                                <?= number_format($product['sale_price']) ?>đ
-                            </td>
+                            
 
                             <td>
 

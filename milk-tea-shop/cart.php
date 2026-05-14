@@ -22,7 +22,7 @@ $sessionId = session_id();
 | PHÍ SHIP CỐ ĐỊNH
 |--------------------------------------------------------------------------
 */
-define('SHIPPING_FEE', 7000);
+define('SHIPPING_FEE', 5000);
 
 /*
 |--------------------------------------------------------------------------
@@ -68,7 +68,7 @@ if (isset($_POST['place_order'])) {
         $totalPrice += $row['price'] * $row['quantity'];
     }
 
-    $shippingFee = SHIPPING_FEE; // Luôn luôn 7.000đ
+    $shippingFee = SHIPPING_FEE; // Luôn luôn 5.000đ
     $finalTotal  = $totalPrice + $shippingFee;
 
     // Tạo đơn hàng
@@ -621,7 +621,8 @@ textarea.form-control {
     <i class="fa-solid fa-truck"></i>
 
     <span >
-        Lưu ý: đơn hàng trong phạm vi 2km phí ship là 7.000đ.
+        Lưu ý: đơn hàng trong phạm vi 2km miễn phí vận chuyển.
+
         Sau mỗi 2km tiếp theo sẽ cộng thêm 5.000đ phí giao hàng.
     </span>
 

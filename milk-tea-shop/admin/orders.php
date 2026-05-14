@@ -96,12 +96,12 @@ if (isset($_POST['update_status'])) {
         ]);
     }
 
-  echo "
+    echo "
 <script>
     window.location.href='index.php?page=orders';
 </script>
 ";
-exit;
+    exit;
 }
 
 /*
@@ -156,13 +156,12 @@ if (
 
 $where = "";
 
-if(count($whereConditions) > 0){
+if (count($whereConditions) > 0) {
 
     $where = "WHERE " . implode(
         " AND ",
         $whereConditions
     );
-
 }
 
 /*
@@ -177,7 +176,7 @@ $pageNumber = isset($_GET['p'])
     ? (int) $_GET['p']
     : 1;
 
-if($pageNumber < 1){
+if ($pageNumber < 1) {
     $pageNumber = 1;
 }
 
@@ -277,336 +276,335 @@ $statusLabels = [
 ?>
 
 <style>
-
-.om-page{
-    padding:24px;
-    background:#f5f7fb;
-    min-height:100vh;
-}
-
-.om-header{
-    margin-bottom:24px;
-}
-
-.om-header h1{
-    font-size:32px;
-    font-weight:700;
-    color:#111827;
-    margin-bottom:8px;
-}
-
-.om-header p{
-    color:#6b7280;
-}
-
-.om-dashboard{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:20px;
-    margin-bottom:24px;
-}
-
-.om-card{
-    background:#fff;
-    border-radius:18px;
-    padding:20px;
-    box-shadow:0 4px 20px rgba(0,0,0,0.05);
-}
-
-.om-icon{
-    width:52px;
-    height:52px;
-    border-radius:14px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:24px;
-    margin-bottom:14px;
-    background:#111827;
-    color:#fff;
-}
-
-.om-yellow{
-    background:#f59e0b;
-}
-
-.om-blue{
-    background:#3b82f6;
-}
-
-.om-green{
-    background:#10b981;
-}
-
-.om-card h3{
-    font-size:15px;
-    color:#6b7280;
-    margin-bottom:10px;
-}
-
-.om-card p{
-    font-size:28px;
-    font-weight:700;
-    color:#111827;
-}
-
-.om-box{
-    background:#fff;
-    border-radius:18px;
-    padding:20px;
-    box-shadow:0 4px 20px rgba(0,0,0,0.05);
-    margin-bottom:24px;
-}
-
-.om-filter{
-    display:flex;
-    gap:14px;
-    flex-wrap:wrap;
-}
-
-.om-filter select,
-.om-filter input{
-    height:46px;
-    border:1px solid #d1d5db;
-    border-radius:12px;
-    padding:0 14px;
-    font-size:14px;
-}
-
-.om-filter button{
-    height:46px;
-    border:none;
-    border-radius:12px;
-    padding:0 18px;
-    background:#111827;
-    color:#fff;
-    cursor:pointer;
-    font-weight:600;
-}
-
-.om-table-wrap{
-    overflow-x:auto;
-}
-
-.om-table{
-    width:100%;
-    border-collapse:collapse;
-}
-
-.om-table thead{
-    background:#f3f4f6;
-}
-
-.om-table th{
-    padding:16px;
-    text-align:left;
-    font-size:14px;
-    color:#374151;
-}
-
-.om-table td{
-    padding:16px;
-    border-top:1px solid #e5e7eb;
-}
-
-.om-order-id{
-    font-weight:700;
-    color:#111827;
-}
-
-.om-customer{
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-
-.om-status{
-    padding:8px 14px;
-    border-radius:999px;
-    font-size:13px;
-    font-weight:600;
-}
-
-.om-status.pending{
-    background:#fef3c7;
-    color:#92400e;
-}
-
-.om-status.confirmed{
-    background:#dbeafe;
-    color:#1d4ed8;
-}
-
-.om-status.shipping{
-    background:#ede9fe;
-    color:#6d28d9;
-}
-
-.om-status.delivered{
-    background:#d1fae5;
-    color:#065f46;
-}
-
-.om-status.cancelled{
-    background:#fee2e2;
-    color:#991b1b;
-}
-
-.om-actions{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    flex-wrap:wrap;
-}
-
-.om-view-btn{
-    width:40px;
-    height:40px;
-    border-radius:10px;
-    background:#111827;
-    color:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-decoration:none;
-}
-
-.om-status-select{
-    height:40px;
-    border-radius:10px;
-    border:1px solid #d1d5db;
-    padding:0 10px;
-}
-
-.om-lock{
-    color:#9ca3af;
-    font-size:14px;
-}
-
-.om-empty{
-    text-align:center;
-    padding:40px 20px;
-}
-
-.om-empty i{
-    font-size:48px;
-    color:#9ca3af;
-    margin-bottom:10px;
-}
-
-.om-pagination{
-    display:flex;
-    justify-content:center;
-    gap:10px;
-    flex-wrap:wrap;
-}
-
-.om-pagination a{
-    width:42px;
-    height:42px;
-    border-radius:10px;
-    background:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-decoration:none;
-    color:#111827;
-    font-weight:600;
-    box-shadow:0 4px 10px rgba(0,0,0,0.05);
-}
-
-.om-pagination a.active{
-    background:#111827;
-    color:#fff;
-}
-
-@media(max-width:992px){
-
-    .om-dashboard{
-        grid-template-columns:repeat(2,1fr);
+    .om-page {
+        padding: 24px;
+        background: #f5f7fb;
+        min-height: 100vh;
     }
 
-}
-
-@media(max-width:768px){
-
-    .om-page{
-        padding:14px;
+    .om-header {
+        margin-bottom: 24px;
     }
 
-    .om-dashboard{
-        grid-template-columns:1fr;
+    .om-header h1 {
+        font-size: 32px;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 8px;
     }
 
-    .om-header h1{
-        font-size:24px;
+    .om-header p {
+        color: #6b7280;
     }
 
-    .om-table th,
-    .om-table td{
-        padding:12px;
-        font-size:13px;
+    .om-dashboard {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 24px;
     }
 
-    .om-filter{
-        flex-direction:column;
+    .om-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .om-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-bottom: 14px;
+        background: #111827;
+        color: #fff;
+    }
+
+    .om-yellow {
+        background: #f59e0b;
+    }
+
+    .om-blue {
+        background: #3b82f6;
+    }
+
+    .om-green {
+        background: #10b981;
+    }
+
+    .om-card h3 {
+        font-size: 15px;
+        color: #6b7280;
+        margin-bottom: 10px;
+    }
+
+    .om-card p {
+        font-size: 28px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .om-box {
+        background: #fff;
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+    }
+
+    .om-filter {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
     }
 
     .om-filter select,
-    .om-filter input,
-    .om-filter button{
-        width:100%;
+    .om-filter input {
+        height: 46px;
+        border: 1px solid #d1d5db;
+        border-radius: 12px;
+        padding: 0 14px;
+        font-size: 14px;
     }
 
-}
-
-    .om-table{
-        min-width:700px;
+    .om-filter button {
+        height: 46px;
+        border: none;
+        border-radius: 12px;
+        padding: 0 18px;
+        background: #111827;
+        color: #fff;
+        cursor: pointer;
+        font-weight: 600;
     }
 
-    .om-status{
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        white-space:nowrap;
-        padding:7px 12px;
-        font-size:12px;
+    .om-table-wrap {
+        overflow-x: auto;
     }
 
-    .om-actions{
-        flex-direction:column;
-        align-items:stretch;
-        gap:8px;
-        min-width:120px;
+    .om-table {
+        width: 100%;
+        border-collapse: collapse;
     }
 
-    .om-actions form{
-        width:100%;
+    .om-table thead {
+        background: #f3f4f6;
     }
 
-    .om-status-select{
-        width:100%;
-        font-size:12px;
-        height:38px;
+    .om-table th {
+        padding: 16px;
+        text-align: left;
+        font-size: 14px;
+        color: #374151;
     }
 
-    .om-view-btn{
-        width:100%;
-        height:38px;
-        border-radius:8px;
+    .om-table td {
+        padding: 16px;
+        border-top: 1px solid #e5e7eb;
     }
 
-    .om-lock{
-        font-size:12px;
-        text-align:center;
+    .om-order-id {
+        font-weight: 700;
+        color: #111827;
     }
 
-    .om-table td{
-        white-space:nowrap;
+    .om-customer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    .om-customer{
-        min-width:140px;
+    .om-status {
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .om-status.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .om-status.confirmed {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .om-status.shipping {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .om-status.delivered {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .om-status.cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .om-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .om-view-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #111827;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .om-status-select {
+        height: 40px;
+        border-radius: 10px;
+        border: 1px solid #d1d5db;
+        padding: 0 10px;
+    }
+
+    .om-lock {
+        color: #9ca3af;
+        font-size: 14px;
+    }
+
+    .om-empty {
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .om-empty i {
+        font-size: 48px;
+        color: #9ca3af;
+        margin-bottom: 10px;
+    }
+
+    .om-pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .om-pagination a {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: #111827;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .om-pagination a.active {
+        background: #111827;
+        color: #fff;
+    }
+
+    @media(max-width:992px) {
+
+        .om-dashboard {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+    }
+
+    @media(max-width:768px) {
+
+        .om-page {
+            padding: 14px;
+        }
+
+        .om-dashboard {
+            grid-template-columns: 1fr;
+        }
+
+        .om-header h1 {
+            font-size: 24px;
+        }
+
+        .om-table th,
+        .om-table td {
+            padding: 12px;
+            font-size: 13px;
+        }
+
+        .om-filter {
+            flex-direction: column;
+        }
+
+        .om-filter select,
+        .om-filter input,
+        .om-filter button {
+            width: 100%;
+        }
+
+    }
+
+    .om-table {
+        min-width: 700px;
+    }
+
+    .om-status {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        padding: 7px 12px;
+        font-size: 12px;
+    }
+
+    .om-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        min-width: 120px;
+    }
+
+    .om-actions form {
+        width: 100%;
+    }
+
+    .om-status-select {
+        width: 100%;
+        font-size: 12px;
+        height: 38px;
+    }
+
+    .om-view-btn {
+        width: 100%;
+        height: 38px;
+        border-radius: 8px;
+    }
+
+    .om-lock {
+        font-size: 12px;
+        text-align: center;
+    }
+
+    .om-table td {
+        white-space: nowrap;
+    }
+
+    .om-customer {
+        min-width: 140px;
     }
 </style>
 
@@ -711,11 +709,10 @@ $statusLabels = [
 
             </select>
 
-            <input 
+            <input
                 type="date"
                 name="date"
-                value="<?= $_GET['date'] ?? '' ?>"
-            >
+                value="<?= $_GET['date'] ?? '' ?>">
 
             <button type="submit">
 
@@ -754,9 +751,9 @@ $statusLabels = [
 
                 <tbody>
 
-                    <?php if(count($orders) > 0): ?>
+                    <?php if (count($orders) > 0): ?>
 
-                        <?php foreach($orders as $order): ?>
+                        <?php foreach ($orders as $order): ?>
 
                             <?php
 
@@ -793,11 +790,11 @@ $statusLabels = [
                                     <span class="om-order-id">
 
                                         #<?= str_pad(
-                                            $order['id'],
-                                            3,
-                                            '0',
-                                            STR_PAD_LEFT
-                                        ) ?>
+                                                $order['id'],
+                                                3,
+                                                '0',
+                                                STR_PAD_LEFT
+                                            ) ?>
 
                                     </span>
 
@@ -854,30 +851,30 @@ $statusLabels = [
 
                                     <div class="om-actions">
 
-                                        <a 
+                                        <a
                                             href="invoice.php?id=<?= $order['id'] ?>"
-                                            class="om-view-btn"
-                                        >
+                                            class="om-view-btn">
 
                                             <i class='bx bx-show'></i>
 
                                         </a>
 
-                                        <?php if(count($allowedTransitions[$currentStatus]) > 0): ?>
+                                        <?php if (count($allowedTransitions[$currentStatus]) > 0): ?>
 
                                             <form method="POST">
 
-                                                <input 
+                                                <input
                                                     type="hidden"
                                                     name="order_id"
-                                                    value="<?= $order['id'] ?>"
-                                                >
+                                                    value="<?= $order['id'] ?>">
 
-                                                <select 
+                                                <select
                                                     name="status"
                                                     class="om-status-select"
-                                                    onchange="this.form.submit()"
-                                                >
+                                                    onchange="
+sessionStorage.setItem('orders_scroll', window.scrollY);
+this.form.submit();
+">
 
                                                     <option value="">
 
@@ -885,7 +882,7 @@ $statusLabels = [
 
                                                     </option>
 
-                                                    <?php foreach($allowedTransitions[$currentStatus] as $nextStatus): ?>
+                                                    <?php foreach ($allowedTransitions[$currentStatus] as $nextStatus): ?>
 
                                                         <option value="<?= $nextStatus ?>">
 
@@ -897,11 +894,10 @@ $statusLabels = [
 
                                                 </select>
 
-                                                <input 
+                                                <input
                                                     type="hidden"
                                                     name="update_status"
-                                                    value="1"
-                                                >
+                                                    value="1">
 
                                             </form>
 
@@ -955,26 +951,24 @@ $statusLabels = [
 
     </div>
 
-    <?php if($totalPages > 1): ?>
+    <?php if ($totalPages > 1): ?>
 
         <div class="om-pagination">
 
-            <?php if($pageNumber > 1): ?>
+            <?php if ($pageNumber > 1): ?>
 
-                <a 
-                    href="?page=orders&p=<?= $pageNumber - 1 ?>"
-                >
+                <a
+                    href="?page=orders&p=<?= $pageNumber - 1 ?>">
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
             <?php endif; ?>
 
-            <?php for($i = 1; $i <= $totalPages; $i++): ?>
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
 
-                <a 
+                <a
                     href="?page=orders&p=<?= $i ?>"
-                    class="<?= $i == $pageNumber ? 'active' : '' ?>"
-                >
+                    class="<?= $i == $pageNumber ? 'active' : '' ?>">
 
                     <?= $i ?>
 
@@ -982,11 +976,10 @@ $statusLabels = [
 
             <?php endfor; ?>
 
-            <?php if($pageNumber < $totalPages): ?>
+            <?php if ($pageNumber < $totalPages): ?>
 
-                <a 
-                    href="?page=orders&p=<?= $pageNumber + 1 ?>"
-                >
+                <a
+                    href="?page=orders&p=<?= $pageNumber + 1 ?>">
                     <i class='bx bx-chevron-right'></i>
                 </a>
 
@@ -999,31 +992,29 @@ $statusLabels = [
 </div>
 
 <script>
+    window.addEventListener('beforeunload', () => {
 
-window.addEventListener('beforeunload', () => {
-
-    sessionStorage.setItem(
-        'orders_scroll',
-        window.scrollY
-    );
-
-});
-
-window.addEventListener('load', () => {
-
-    const scrollPosition = sessionStorage.getItem(
-        'orders_scroll'
-    );
-
-    if(scrollPosition !== null){
-
-        window.scrollTo(
-            0,
-            parseInt(scrollPosition)
+        sessionStorage.setItem(
+            'orders_scroll',
+            window.scrollY
         );
 
-    }
+    });
 
-});
+    window.addEventListener('load', () => {
 
+        const scrollPosition = sessionStorage.getItem(
+            'orders_scroll'
+        );
+
+        if (scrollPosition !== null) {
+
+            window.scrollTo(
+                0,
+                parseInt(scrollPosition)
+            );
+
+        }
+
+    });
 </script>
