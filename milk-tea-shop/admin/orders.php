@@ -868,13 +868,10 @@ $statusLabels = [
                                                     name="order_id"
                                                     value="<?= $order['id'] ?>">
 
-                                                <select
+                                               <select
                                                     name="status"
                                                     class="om-status-select"
-                                                    onchange="
-sessionStorage.setItem('orders_scroll', window.scrollY);
-this.form.submit();
-">
+                                                    onchange="confirmOrderStatus(this)">
 
                                                     <option value="">
 
@@ -1017,4 +1014,63 @@ this.form.submit();
         }
 
     });
+</script>
+<script>
+
+    function confirmOrderStatus(selectElement) {
+
+        const selectedValue = selectElement.value;
+
+        if (!selectedValue) {
+            return;
+        }
+
+        if (selectedValue === 'cancelled') {
+
+            const confirmCancel = confirm(
+                'Bạn có chắc muốn hủy đơn hàng này không?'
+            );
+
+            if (!confirmCancel) {
+
+                selectElement.selectedIndex = 0;
+
+                return;
+            }
+        }
+
+        sessionStorage.setItem(
+            'orders_scroll',
+            window.scrollY
+        );
+
+        selectElement.form.submit();
+    }
+
+    window.addEventListener('beforeunload', () => {
+
+        sessionStorage.setItem(
+            'orders_scroll',
+            window.scrollY
+        );
+
+    });
+
+    window.addEventListener('load', () => {
+
+        const scrollPosition = sessionStorage.getItem(
+            'orders_scroll'
+        );
+
+        if (scrollPosition !== null) {
+
+            window.scrollTo(
+                0,
+                parseInt(scrollPosition)
+            );
+
+        }
+
+    });
+
 </script>
