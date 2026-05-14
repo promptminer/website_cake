@@ -10,6 +10,10 @@ session_start();
 $categoryId = isset($_GET['category'])
     ? (int)$_GET['category']
     : 0;
+$keyword = isset($_GET['keyword'])
+    ? trim($_GET['keyword'])
+    : '';
+
 $host     = "localhost";
 $user     = "root";
 $password = "mysql";
@@ -79,34 +83,34 @@ $categories = mysqli_query($conn, "
 |---------------------------------------------------
 */
 
+$where = [];
+
 if($categoryId > 0){
-
-    $products = mysqli_query($conn, "
-        SELECT 
-            p.*,
-            c.name as category_name,
-            pr.discount_percent
-        FROM products p
-        LEFT JOIN categories c ON p.category_id = c.id
-        LEFT JOIN promotions pr ON p.promotion_id = pr.id
-        WHERE p.category_id = '$categoryId'
-        ORDER BY p.id DESC
-    ");
-
-}else{
-
-    $products = mysqli_query($conn, "
-        SELECT 
-            p.*,
-            c.name as category_name,
-            pr.discount_percent
-        FROM products p
-        LEFT JOIN categories c ON p.category_id = c.id
-        LEFT JOIN promotions pr ON p.promotion_id = pr.id
-        ORDER BY p.id DESC
-    ");
-
+    $where[] = "p.category_id = '$categoryId'";
 }
+
+if($keyword != ''){
+    $keywordSql = mysqli_real_escape_string($conn, $keyword);
+    $where[] = "p.name LIKE '%$keywordSql%'";
+}
+
+$whereSql = '';
+
+if(count($where) > 0){
+    $whereSql = "WHERE " . implode(" AND ", $where);
+}
+
+$products = mysqli_query($conn, "
+    SELECT 
+        p.*,
+        c.name as category_name,
+        pr.discount_percent
+    FROM products p
+    LEFT JOIN categories c ON p.category_id = c.id
+    LEFT JOIN promotions pr ON p.promotion_id = pr.id
+    $whereSql
+    ORDER BY p.id DESC
+");
 
 ?>
 
@@ -490,6 +494,37 @@ if($categoryId > 0){
     background:#111827;
     color:white;
 }
+.search-form{
+    margin:20px 0;
+    display:flex;
+    gap:12px;
+}
+
+.search-input{
+    flex:1;
+    height:52px;
+    border:1px solid #e5e7eb;
+    border-radius:16px;
+    padding:0 18px;
+    font-size:14px;
+    outline:none;
+    background:white;
+}
+
+.search-input:focus{
+    border-color:#111827;
+}
+
+.search-btn{
+    width:52px;
+    height:52px;
+    border:none;
+    border-radius:16px;
+    background:#111827;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
 </style>
 
 </head>
@@ -559,6 +594,26 @@ if($categoryId > 0){
 
     <section class="container">
 
+    <!-- SEARCH -->
+<form method="GET" class="search-form">
+
+    <?php if($categoryId > 0): ?>
+        <input type="hidden" name="category" value="<?= $categoryId ?>">
+    <?php endif; ?>
+
+    <input
+        type="text"
+        name="keyword"
+        placeholder="Tìm trà sữa, bánh ngọt..."
+        value="<?= htmlspecialchars($keyword) ?>"
+        class="search-input"
+    >
+
+    <button type="submit" class="search-btn">
+        <i class="fa-solid fa-magnifying-glass"></i>
+    </button>
+
+</form>
         <!-- DANH MỤC -->
         <div class="category-list">
             <a href="./index.php"
@@ -591,6 +646,20 @@ if($categoryId > 0){
 
             <?php while($product = mysqli_fetch_assoc($products)): ?>
 
+                <?php if(mysqli_num_rows($products) <= 0): ?>
+
+<div style="
+    grid-column:1/-1;
+    background:white;
+    padding:40px;
+    border-radius:24px;
+    text-align:center;
+    border:1px solid #eee;
+">
+    Không tìm thấy sản phẩm
+</div>
+
+<?php endif; ?>
                 <?php
 
                     $price = $product['price'];
