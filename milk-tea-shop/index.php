@@ -494,37 +494,6 @@ $products = mysqli_query($conn, "
     background:#111827;
     color:white;
 }
-.search-form{
-    margin:20px 0;
-    display:flex;
-    gap:12px;
-}
-
-.search-input{
-    flex:1;
-    height:52px;
-    border:1px solid #e5e7eb;
-    border-radius:16px;
-    padding:0 18px;
-    font-size:14px;
-    outline:none;
-    background:white;
-}
-
-.search-input:focus{
-    border-color:#111827;
-}
-
-.search-btn{
-    width:52px;
-    height:52px;
-    border:none;
-    border-radius:16px;
-    background:#111827;
-    color:white;
-    font-size:16px;
-    cursor:pointer;
-}
 </style>
 
 </head>
