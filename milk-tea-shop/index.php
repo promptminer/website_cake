@@ -91,7 +91,7 @@ $products = mysqli_query($conn, "
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Tiệm Trà Sữa X</title>
+<title>Arpina coffee and bakery</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -454,7 +454,7 @@ $products = mysqli_query($conn, "
             <div class="header-wrapper">
 
                 <a href="#" class="logo">
-                    Tiệm Trà Sữa X
+                    Arpina coffee and bakery
                 </a>
                 <div style="display:flex;align-items:center;gap:12px;">
 
@@ -620,7 +620,7 @@ $products = mysqli_query($conn, "
     <footer class="footer">
 
         <div class="container">
-            © 2026 Tiệm Trà Sữa X
+            © 2026 Arpina coffee and bakery
         </div>
 
     </footer>

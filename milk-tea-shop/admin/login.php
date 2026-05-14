@@ -193,10 +193,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-weight:600;
             cursor:pointer;
             transition:.2s;
+            margin-bottom:14px;
         }
 
         .login-btn:hover{
             opacity:.92;
+        }
+
+        .home-btn{
+            width:100%;
+            height:56px;
+            border-radius:18px;
+            border:1px solid #d1d5db;
+            background:#fff;
+            color:#111827;
+            font-size:15px;
+            font-weight:600;
+            text-decoration:none;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:10px;
+            transition:.2s;
+        }
+
+        .home-btn:hover{
+            background:#f9fafb;
         }
 
         .error-box{
@@ -231,7 +253,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </h1>
 
         <p class="description">
-            Đăng nhập quản trị hệ thống Tiệm Trà Sữa X
+            Đăng nhập quản trị hệ thống Arpina coffee and bakery
         </p>
 
         <?php if(!empty($error)): ?>
@@ -277,13 +299,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <button type="submit" class="login-btn">
+                <i class="fa-solid fa-right-to-bracket"></i>
                 Đăng nhập quản trị
             </button>
 
         </form>
 
+        <a 
+            href="../index.php"
+            class="home-btn"
+        >
+            <i class="fa-solid fa-house"></i>
+            Về trang người dùng
+        </a>
+
         <div class="footer">
-            © 2026 Tiệm Trà Sữa X
+            © 2026 Arpina coffee and bakery
         </div>
 
     </div>
