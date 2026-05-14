@@ -1,0 +1,58 @@
+RewriteEngine On
+
+# =========================================================
+# ẨN FILE PHP
+# =========================================================
+
+RewriteCond %{THE_REQUEST} \s/+index\.php[\s?] [NC]
+RewriteRule ^index\.php$ ./ [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+cart\.php[\s?] [NC]
+RewriteRule ^cart\.php$ cart [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+checkout\.php[\s?] [NC]
+RewriteRule ^checkout\.php$ checkout [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+admin/index\.php[\s?] [NC]
+RewriteRule ^admin/index\.php$ admin/dashboard [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+admin/login\.php[\s?] [NC]
+RewriteRule ^admin/login\.php$ admin/login [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+admin/logout\.php[\s?] [NC]
+RewriteRule ^admin/logout\.php$ admin/logout [R=301,L]
+
+# =========================================================
+# USER ROUTES
+# =========================================================
+
+RewriteRule ^$ index.php [L]
+
+RewriteRule ^cart/?$ cart.php [L,QSA]
+RewriteRule ^checkout/?$ checkout.php [L,QSA]
+
+RewriteRule ^products/?$ index.php?page=products [L,QSA]
+RewriteRule ^categories/?$ index.php?page=categories [L,QSA]
+RewriteRule ^orders/?$ index.php?page=orders [L,QSA]
+
+# =========================================================
+# ADMIN ROUTES
+# =========================================================
+
+RewriteRule ^admin/?$ admin/index.php [L]
+
+RewriteRule ^admin/dashboard/?$ admin/index.php?page=dashboard [L,QSA]
+RewriteRule ^admin/products/?$ admin/index.php?page=products [L,QSA]
+RewriteRule ^admin/categories/?$ admin/index.php?page=categories [L,QSA]
+RewriteRule ^admin/orders/?$ admin/index.php?page=orders [L,QSA]
+RewriteRule ^admin/promotions/?$ admin/index.php?page=promotions [L,QSA]
+
+RewriteRule ^admin/login/?$ admin/login.php [L,QSA]
+RewriteRule ^admin/logout/?$ admin/logout.php [L,QSA]
+
+# =========================================================
+# API
+# =========================================================
+
+RewriteRule ^api/cart/?$ api/cart.php [L,QSA]
+RewriteRule ^api/checkout/?$ api/checkout.php [L,QSA]
