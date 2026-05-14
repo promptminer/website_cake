@@ -677,18 +677,14 @@ try {
             }
 
         }
-
-        .menu-user-link {
-            background: #1f2937;
-        }
-
-        .menu-user-link:hover {
-            background: #2563eb !important;
-        }
-        .shipping{
-    background:#ede9fe;
-    color:#6d28d9;
+        .menu-user-link{
+    background:#1f2937;
 }
+
+.menu-user-link:hover{
+    background:#2563eb !important;
+}
+
     </style>
 
 </head>
@@ -745,23 +741,24 @@ try {
                     </a>
                 </li>
 
+            
+            <li>
+    <a 
+        href="../index.php"
+        target="_blank"
+        class="menu-user-link"
+    >
+        <i class='bx bx-home-alt'></i>
+        Trang người dùng
+    </a>
+</li>
 
-                <li>
-                    <a
-                        href="../index.php"
-                        target="_blank"
-                        class="menu-user-link">
-                        <i class='bx bx-home-alt'></i>
-                        Trang người dùng
-                    </a>
-                </li>
-
-                <li>
-                    <a href="logout.php">
-                        <i class='bx bx-log-out'></i>
-                        Đăng xuất
-                    </a>
-                </li>
+<li>
+    <a href="logout.php">
+        <i class='bx bx-log-out'></i>
+        Đăng xuất
+    </a>
+</li>
 
             </ul>
 
