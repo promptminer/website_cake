@@ -1,11 +1,185 @@
 <?php
 
 require_once "../core/auth.php";
+require_once "../core/db.php";
+
+$page = $_GET['page'] ?? 'dashboard';
+
+$allowedPages = [
+    'dashboard',
+    'categories',
+    'products',
+    'orders',
+    'promotions'
+];
+
+if (!in_array($page, $allowedPages)) {
+    $page = 'dashboard';
+}
+
+/*
+|--------------------------------------------------------------------------
+| DASHBOARD STATS
+|--------------------------------------------------------------------------
+*/
+
+$totalProducts = 0;
+$totalOrders = 0;
+$totalRevenue = 0;
+$totalPromotions = 0;
+$pendingOrders = 0;
+
+/*
+|--------------------------------------------------------------------------
+| REVENUE
+|--------------------------------------------------------------------------
+*/
+
+$todayRevenue = 0;
+$weekRevenue = 0;
+$monthRevenue = 0;
+
+try {
+
+    $totalProducts = $pdo
+        ->query("SELECT COUNT(*) FROM products")
+        ->fetchColumn();
+
+    $totalOrders = $pdo
+        ->query("SELECT COUNT(*) FROM orders")
+        ->fetchColumn();
+
+    $totalRevenue = $pdo
+        ->query("
+            SELECT COALESCE(SUM(total_price),0)
+            FROM orders
+            WHERE status != 'cancelled'
+        ")
+        ->fetchColumn();
+
+    $totalPromotions = $pdo
+        ->query("SELECT COUNT(*) FROM promotions")
+        ->fetchColumn();
+
+    $pendingOrders = $pdo
+        ->query("
+            SELECT COUNT(*)
+            FROM orders
+            WHERE status = 'pending'
+        ")
+        ->fetchColumn();
+
+    /*
+    |--------------------------------------------------------------------------
+    | TODAY REVENUE
+    |--------------------------------------------------------------------------
+    */
+
+    $todayRevenue = $pdo
+        ->query("
+            SELECT COALESCE(SUM(total_price),0)
+            FROM orders
+            WHERE DATE(created_at) = CURDATE()
+            AND status != 'cancelled'
+        ")
+        ->fetchColumn();
+
+    /*
+    |--------------------------------------------------------------------------
+    | WEEK REVENUE
+    |--------------------------------------------------------------------------
+    */
+
+    $weekRevenue = $pdo
+        ->query("
+            SELECT COALESCE(SUM(total_price),0)
+            FROM orders
+            WHERE YEARWEEK(created_at, 1) = YEARWEEK(CURDATE(), 1)
+            AND status != 'cancelled'
+        ")
+        ->fetchColumn();
+
+    /*
+    |--------------------------------------------------------------------------
+    | MONTH REVENUE
+    |--------------------------------------------------------------------------
+    */
+
+    $monthRevenue = $pdo
+        ->query("
+            SELECT COALESCE(SUM(total_price),0)
+            FROM orders
+            WHERE MONTH(created_at) = MONTH(CURDATE())
+            AND YEAR(created_at) = YEAR(CURDATE())
+            AND status != 'cancelled'
+        ")
+        ->fetchColumn();
+
+} catch (Exception $e) {
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| TOP PRODUCTS
+|--------------------------------------------------------------------------
+*/
+
+$topProducts = [];
+
+try {
+
+    $stmt = $pdo->query("
+        SELECT 
+            products.name,
+            products.image,
+            SUM(order_details.quantity) as total_sold
+        FROM order_details
+        INNER JOIN products 
+            ON products.id = order_details.product_id
+        INNER JOIN orders 
+            ON orders.id = order_details.order_id
+        WHERE orders.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        GROUP BY products.id
+        ORDER BY total_sold DESC
+        LIMIT 5
+    ");
+
+    $topProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (Exception $e) {
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| RECENT ORDERS
+|--------------------------------------------------------------------------
+*/
+
+$recentOrders = [];
+
+try {
+
+    $stmt = $pdo->query("
+        SELECT *
+        FROM orders
+        ORDER BY id DESC
+        LIMIT 6
+    ");
+
+    $recentOrders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (Exception $e) {
+
+}
+
 ?>
 
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+
     <meta charset="UTF-8">
 
     <title>Admin Panel</title>
@@ -589,10 +763,334 @@ require_once "../core/auth.php";
 
     </aside>
 
+    <!-- CONTENT -->
     <main class="content">
-        <h1>Dashboard</h1>
 
-        <p>Quản trị hệ thống trà sữa.</p>
+        <!-- MOBILE HEADER -->
+        <div class="mobile-header">
+
+            <button class="menu-toggle" id="menuToggle">
+                <i class='bx bx-menu'></i>
+            </button>
+
+            <div class="admin-profile">
+                <i class='bx bxs-user-circle'></i>
+                <span>Admin</span>
+            </div>
+
+        </div>
+
+        <?php
+
+        switch ($page) {
+
+            case 'categories':
+                require_once "categories.php";
+                break;
+
+            case 'products':
+                require_once "products.php";
+                break;
+
+            case 'orders':
+                require_once "orders.php";
+                break;
+
+            case 'promotions':
+                require_once "promotions.php";
+                break;
+
+            default:
+        ?>
+
+        <!-- TOPBAR -->
+        <div class="topbar">
+
+            <div class="topbar-left">
+                <h1>Dashboard</h1>
+                <p>Quản lý cửa hàng trà sữa và bánh ngọt</p>
+            </div>
+
+            <div class="topbar-right">
+
+                <div class="admin-profile">
+                    <i class='bx bxs-user-circle'></i>
+                    <span>Xin chào Admin</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- MAIN STATS -->
+        <div class="dashboard-grid">
+
+            <div class="dashboard-card">
+
+                <div class="card-top">
+                    <h3>Tổng sản phẩm</h3>
+                    <i class='bx bxs-package'></i>
+                </div>
+
+                <p><?= $totalProducts ?></p>
+
+            </div>
+
+            <div class="dashboard-card">
+
+                <div class="card-top">
+                    <h3>Đơn hàng</h3>
+                    <i class='bx bxs-cart'></i>
+                </div>
+
+                <p><?= $totalOrders ?></p>
+
+            </div>
+
+            <div class="dashboard-card">
+
+                <div class="card-top">
+                    <h3>Khuyến mãi</h3>
+                    <i class='bx bxs-discount'></i>
+                </div>
+
+                <p><?= $totalPromotions ?></p>
+
+            </div>
+
+            <div class="dashboard-card">
+
+                <div class="card-top">
+                    <h3>Đơn chờ xử lý</h3>
+                    <i class='bx bx-time-five'></i>
+                </div>
+
+                <p><?= $pendingOrders ?></p>
+
+            </div>
+
+        </div>
+
+        <!-- REVENUE -->
+        <div class="dashboard-grid">
+
+            <div class="dashboard-card">
+
+                <div class="card-top">
+                    <h3>Doanh thu hôm nay</h3>
+                    <i class='bx bx-money'></i>
+                </div>
+
+                <p><?= number_format($todayRevenue, 0, ',', '.') ?>đ</p>
+
+            </div>
+
+            <div class="dashboard-card">
+
+                <div class="card-top">
+                    <h3>Doanh thu tuần</h3>
+                    <i class='bx bx-line-chart'></i>
+                </div>
+
+                <p><?= number_format($weekRevenue, 0, ',', '.') ?>đ</p>
+
+            </div>
+
+            <div class="dashboard-card">
+
+                <div class="card-top">
+                    <h3>Doanh thu tháng</h3>
+                    <i class='bx bx-bar-chart'></i>
+                </div>
+
+                <p><?= number_format($monthRevenue, 0, ',', '.') ?>đ</p>
+
+            </div>
+
+            <div class="dashboard-card">
+
+                <div class="card-top">
+                    <h3>Tổng doanh thu</h3>
+                    <i class='bx bxs-wallet'></i>
+                </div>
+
+                <p><?= number_format($totalRevenue, 0, ',', '.') ?>đ</p>
+
+            </div>
+
+        </div>
+
+        <!-- CONTENT GRID -->
+        <div class="content-grid">
+
+            <!-- ORDERS -->
+            <div class="box">
+
+                <div class="box-title">
+
+                    <h2>Đơn hàng gần đây</h2>
+
+                    <span>
+                        <?= $pendingOrders ?> đơn chờ xử lý
+                    </span>
+
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>Mã</th>
+                                <th>Khách hàng</th>
+                                <th>SĐT</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <?php if(count($recentOrders) > 0): ?>
+
+                                <?php foreach($recentOrders as $order): ?>
+
+                                    <tr>
+
+                                        <td>
+                                            #<?= $order['id'] ?>
+                                        </td>
+
+                                        <td>
+                                            <?= htmlspecialchars($order['customer_name']) ?>
+                                        </td>
+
+                                        <td>
+                                            <?= htmlspecialchars($order['phone']) ?>
+                                        </td>
+
+                                        <td>
+                                            <?= number_format($order['total_price'],0,',','.') ?>đ
+                                        </td>
+
+                                        <td>
+
+                                            <span class="status <?= $order['status'] ?>">
+
+                                                <?php
+
+                                                switch($order['status']){
+
+                                                    case 'pending':
+                                                        echo 'Chờ xác nhận';
+                                                        break;
+
+                                                    case 'confirmed':
+                                                        echo 'Đã xác nhận';
+                                                        break;
+
+                                                    case 'delivered':
+                                                        echo 'Đã giao';
+                                                        break;
+
+                                                    case 'cancelled':
+                                                        echo 'Đã hủy';
+                                                        break;
+
+                                                }
+
+                                                ?>
+
+                                            </span>
+
+                                        </td>
+
+                                    </tr>
+
+                                <?php endforeach; ?>
+
+                            <?php else: ?>
+
+                                <tr>
+                                    <td colspan="5">
+
+                                        <div class="empty-box">
+                                            Chưa có đơn hàng nào
+                                        </div>
+
+                                    </td>
+                                </tr>
+
+                            <?php endif; ?>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+            <!-- TOP PRODUCTS -->
+            <div class="box">
+
+                <div class="box-title">
+                    <h2>Bán chạy tuần</h2>
+                </div>
+
+                <div class="top-product-list">
+
+                    <?php if(count($topProducts) > 0): ?>
+
+                        <?php foreach($topProducts as $item): ?>
+
+                            <div class="top-product-item">
+
+                                <img 
+                                    src="../uploads/products/<?= htmlspecialchars($item['image']) ?>" 
+                                    alt=""
+                                >
+
+                                <div class="top-product-info">
+
+                                    <h4>
+                                        <?= htmlspecialchars($item['name']) ?>
+                                    </h4>
+
+                                    <span>
+                                        Đã bán <?= $item['total_sold'] ?> sản phẩm
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        <?php endforeach; ?>
+
+                    <?php else: ?>
+
+                        <div class="empty-box">
+                            Chưa có dữ liệu thống kê
+                        </div>
+
+                    <?php endif; ?>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <?php
+
+                break;
+        }
+
+        ?>
+
     </main>
 
 </div>

@@ -231,7 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </h1>
 
         <p class="description">
-            Đăng nhập quản trị hệ thống Tiệm Trà Sữa X
+            Đăng nhập quản trị hệ thống Arpina coffee and bakery
         </p>
 
         <?php if(!empty($error)): ?>
@@ -283,7 +283,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
 
         <div class="footer">
-            © 2026 Tiệm Trà Sữa X
+            © 2026 Arpina coffee and bakery
         </div>
 
     </div>

@@ -1,7 +1,6 @@
 <?php
 
 session_start();
-
 /*
 |---------------------------------------------------
 | FILTER CATEGORY
@@ -11,21 +10,18 @@ session_start();
 $categoryId = isset($_GET['category'])
     ? (int)$_GET['category']
     : 0;
+$host     = "localhost";
+$user     = "root";
+$password = "mysql";
+$database = "milk_tea_shop";
 
+$conn = mysqli_connect($host, $user, $password, $database);
 
+if (!$conn) {
+    die("Kết nối database thất bại");
+}
 
-    $host     = "localhost";
-    $user     = "root";
-    $password = "mysql";
-    $database = "milk_tea_shop";
-
-    $conn = mysqli_connect($host, $user, $password, $database);
-
-    if (!$conn) {
-        die("Kết nối database thất bại");
-    }
-
-    mysqli_set_charset($conn, "utf8");
+mysqli_set_charset($conn, "utf8");
 
 /*
 |---------------------------------------------------
@@ -33,49 +29,49 @@ $categoryId = isset($_GET['category'])
 |---------------------------------------------------
 */
 
-    $sessionId = session_id();
+$sessionId = session_id();
 
-    /*
-    |---------------------------------------------------
-    | TẠO GIỎ HÀNG NẾU CHƯA CÓ
-    |---------------------------------------------------
-    */
+/*
+|---------------------------------------------------
+| TẠO GIỎ HÀNG NẾU CHƯA CÓ
+|---------------------------------------------------
+*/
 
-    $getCart = mysqli_query($conn, "
-        SELECT id
-        FROM carts
-        WHERE session_id = '$sessionId'
-        LIMIT 1
+$getCart = mysqli_query($conn, "
+    SELECT id
+    FROM carts
+    WHERE session_id = '$sessionId'
+    LIMIT 1
+");
+
+$cart = mysqli_fetch_assoc($getCart);
+
+if (!$cart) {
+
+    mysqli_query($conn, "
+        INSERT INTO carts(session_id)
+        VALUES('$sessionId')
     ");
 
-    $cart = mysqli_fetch_assoc($getCart);
+    $cartId = mysqli_insert_id($conn);
 
-    if (!$cart) {
+} else {
 
-        mysqli_query($conn, "
-            INSERT INTO carts(session_id)
-            VALUES('$sessionId')
-        ");
+    $cartId = $cart['id'];
 
-        $cartId = mysqli_insert_id($conn);
+}
 
-    } else {
+/*
+|---------------------------------------------------
+| CATEGORY
+|---------------------------------------------------
+*/
 
-        $cartId = $cart['id'];
-
-    }
-
-    /*
-    |---------------------------------------------------
-    | CATEGORY
-    |---------------------------------------------------
-    */
-
-    $categories = mysqli_query($conn, "
-        SELECT *
-        FROM categories
-        ORDER BY id DESC
-    ");
+$categories = mysqli_query($conn, "
+    SELECT *
+    FROM categories
+    ORDER BY id DESC
+");
 
 /*
 |---------------------------------------------------
@@ -121,7 +117,7 @@ if($categoryId > 0){
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Tiệm Trà Sữa X</title>
+<title>Arpina coffee and bakery</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -185,7 +181,7 @@ if($categoryId > 0){
     }
 
     .logo{
-        font-size:22px;
+        font-size:18px;
         font-weight:700;
     }
 
@@ -475,7 +471,6 @@ if($categoryId > 0){
     background:#111827 !important;
     color:white !important;
 }
-
 </style>
 
 </head>
@@ -488,7 +483,7 @@ if($categoryId > 0){
             <div class="header-wrapper">
 
                 <a href="#" class="logo">
-                    Tiệm Trà Sữa X
+                    Arpina coffee and bakery
                 </a>
                 <div style="display:flex;align-items:center;gap:12px;">
 
@@ -540,7 +535,6 @@ if($categoryId > 0){
 
         <!-- DANH MỤC -->
         <div class="category-list">
-
             <a href="./index.php"
                 class="category-item <?= $categoryId == 0 ? 'active-category' : '' ?>">
                     Tất cả
@@ -551,10 +545,11 @@ if($categoryId > 0){
                 <?php while($category = mysqli_fetch_assoc($categories)): ?>
 
                     <a
-                        href="./index.php?category=<?= $category['id'] ?>"
-                        class="category-item <?= $categoryId == $category['id'] ? 'active-category' : '' ?>" >
-                        <?= $category['name'] ?>
-                    </a>
+    href="./index.php?category=<?= $category['id'] ?>"
+    class="category-item <?= $categoryId == $category['id'] ? 'active-category' : '' ?>"
+>
+    <?= $category['name'] ?>
+</a>
 
                 <?php endwhile; ?>
 
@@ -657,7 +652,7 @@ if($categoryId > 0){
     <footer class="footer">
 
         <div class="container">
-            © 2026 Tiệm Trà Sữa X
+            © 2026 Arpina coffee and bakery
         </div>
 
     </footer>
