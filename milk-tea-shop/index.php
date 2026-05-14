@@ -2,6 +2,18 @@
 
 session_start();
 
+/*
+|---------------------------------------------------
+| FILTER CATEGORY
+|---------------------------------------------------
+*/
+
+$categoryId = isset($_GET['category'])
+    ? (int)$_GET['category']
+    : 0;
+
+
+
 $host     = "localhost";
 $user     = "root";
 $password = "mysql";
@@ -71,16 +83,34 @@ $categories = mysqli_query($conn, "
 |---------------------------------------------------
 */
 
-$products = mysqli_query($conn, "
-    SELECT 
-        p.*,
-        c.name as category_name,
-        pr.discount_percent
-    FROM products p
-    LEFT JOIN categories c ON p.category_id = c.id
-    LEFT JOIN promotions pr ON p.promotion_id = pr.id
-    ORDER BY p.id DESC
-");
+if($categoryId > 0){
+
+    $products = mysqli_query($conn, "
+        SELECT 
+            p.*,
+            c.name as category_name,
+            pr.discount_percent
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
+        LEFT JOIN promotions pr ON p.promotion_id = pr.id
+        WHERE p.category_id = '$categoryId'
+        ORDER BY p.id DESC
+    ");
+
+}else{
+
+    $products = mysqli_query($conn, "
+        SELECT 
+            p.*,
+            c.name as category_name,
+            pr.discount_percent
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
+        LEFT JOIN promotions pr ON p.promotion_id = pr.id
+        ORDER BY p.id DESC
+    ");
+
+}
 
 ?>
 
@@ -441,6 +471,10 @@ $products = mysqli_query($conn, "
 #toast.error{
     background:#dc2626;
 }
+.active-category{
+    background:#111827 !important;
+    color:white !important;
+}
 
 </style>
 
@@ -507,15 +541,18 @@ $products = mysqli_query($conn, "
         <!-- DANH MỤC -->
         <div class="category-list">
 
-            <a href="#" class="category-item">
-                Tất cả
+            <a href="./index.php"
+                class="category-item <?= $categoryId == 0 ? 'active-category' : '' ?>">
+                    Tất cả
             </a>
 
             <?php if($categories && mysqli_num_rows($categories) > 0): ?>
 
                 <?php while($category = mysqli_fetch_assoc($categories)): ?>
 
-                    <a href="#" class="category-item">
+                    <a
+                        href="./index.php?category=<?= $category['id'] ?>"
+                        class="category-item <?= $categoryId == $category['id'] ? 'active-category' : '' ?>" >
                         <?= $category['name'] ?>
                     </a>
 
