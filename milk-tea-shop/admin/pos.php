@@ -1,3 +1,9 @@
+```php
+<link
+    href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+    rel="stylesheet"
+/>
+
 <?php
 
 require_once "../core/auth.php";
@@ -41,12 +47,6 @@ if(isset($_POST['create_pos_order'])){
 
                 $pdo->beginTransaction();
 
-                /*
-                |--------------------------------------------------------------------------
-                | INSERT ORDER
-                |--------------------------------------------------------------------------
-                */
-
                 $insertOrder = $pdo->prepare("
                     INSERT INTO orders(
                         customer_name,
@@ -76,12 +76,6 @@ if(isset($_POST['create_pos_order'])){
                 ]);
 
                 $orderId = $pdo->lastInsertId();
-
-                /*
-                |--------------------------------------------------------------------------
-                | INSERT ORDER DETAILS
-                |--------------------------------------------------------------------------
-                */
 
                 $insertDetail = $pdo->prepare("
                     INSERT INTO order_details(
@@ -115,6 +109,7 @@ if(isset($_POST['create_pos_order'])){
                         window.location.href='invoice.php?id=".$orderId."';
                     </script>
                 ";
+
                 exit;
 
             }catch(Exception $e){
@@ -130,6 +125,19 @@ if(isset($_POST['create_pos_order'])){
         }
     }
 }
+
+/*
+|--------------------------------------------------------------------------
+| GET CATEGORIES
+|--------------------------------------------------------------------------
+*/
+
+$cateStmt = $pdo->query("
+    SELECT * FROM categories
+    ORDER BY name ASC
+");
+
+$categories = $cateStmt->fetchAll(PDO::FETCH_ASSOC);
 
 /*
 |--------------------------------------------------------------------------
@@ -153,6 +161,10 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <style>
 
+body{
+    background:#f5f7fb;
+}
+
 .pos-page{
     display:flex;
     gap:24px;
@@ -171,9 +183,14 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     box-shadow:0 4px 20px rgba(0,0,0,0.05);
     position:sticky;
     top:20px;
+    backdrop-filter:blur(10px);
 }
 
 .pos-header{
+    margin-bottom:24px;
+}
+
+.top-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -182,13 +199,13 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     flex-wrap:wrap;
 }
 
-.pos-header h1{
+.top-header h1{
     font-size:30px;
     font-weight:700;
     color:#111827;
 }
 
-.pos-header p{
+.top-header p{
     margin-top:6px;
     color:#6b7280;
 }
@@ -219,6 +236,37 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     outline:none;
 }
 
+.category-filter{
+    display:flex;
+    gap:12px;
+    overflow:auto;
+    padding-bottom:6px;
+}
+
+.category-btn{
+    border:none;
+    background:#fff;
+    padding:12px 18px;
+    border-radius:14px;
+    cursor:pointer;
+    font-weight:600;
+    white-space:nowrap;
+    box-shadow:0 4px 12px rgba(0,0,0,0.05);
+    transition:0.25s;
+    color:#374151;
+}
+
+.category-btn:hover{
+    background:#f59e0b;
+    color:#fff;
+    transform:translateY(-2px);
+}
+
+.category-btn.active{
+    background:#111827;
+    color:#fff;
+}
+
 .product-grid{
     display:grid;
     grid-template-columns:repeat(3,1fr);
@@ -226,9 +274,11 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 .product-card{
+    position:relative;
     background:#fff;
     border-radius:22px;
     overflow:hidden;
+    border:1px solid #f3f4f6;
     box-shadow:0 4px 18px rgba(0,0,0,0.05);
     transition:0.25s;
 }
@@ -248,6 +298,11 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     width:100%;
     height:100%;
     object-fit:cover;
+    transition:0.35s;
+}
+
+.product-card:hover .product-image img{
+    transform:scale(1.06);
 }
 
 .product-body{
@@ -285,7 +340,11 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     height:50px;
     border:none;
     border-radius:14px;
-    background:#111827;
+    background:linear-gradient(
+        135deg,
+        #111827,
+        #1f2937
+    );
     color:#fff;
     font-size:15px;
     font-weight:600;
@@ -298,9 +357,24 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 .cart-title{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
     font-size:22px;
     font-weight:700;
     margin-bottom:22px;
+}
+
+.cart-badge{
+    background:#f59e0b;
+    color:#fff;
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
 }
 
 .cart-list{
@@ -414,7 +488,11 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     height:56px;
     border:none;
     border-radius:16px;
-    background:#f59e0b;
+    background:linear-gradient(
+        135deg,
+        #f59e0b,
+        #ea580c
+    );
     color:#fff;
     font-size:16px;
     font-weight:700;
@@ -468,7 +546,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
         font-size:18px;
     }
 
-    .pos-header{
+    .top-header{
         flex-direction:column;
         align-items:stretch;
     }
@@ -487,27 +565,59 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <div class="pos-header">
 
-            <div>
+            <div class="top-header">
 
-                <h1>
-                    Bán tại quầy
-                </h1>
+                <div>
 
-                <p>
-                    Tạo bill nhanh cho khách mua trực tiếp
-                </p>
+                    <h1>
+                        <i class="ri-store-2-line"></i>
+                        Bán tại quầy
+                    </h1>
+
+                    <p>
+                        Tạo bill nhanh cho khách mua trực tiếp
+                    </p>
+
+                </div>
+
+                <div class="pos-search">
+
+                    <i class="ri-search-line"></i>
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Tìm sản phẩm..."
+                    >
+
+                </div>
 
             </div>
 
-            <div class="pos-search">
+            <div class="category-filter">
 
-                <i class='bx bx-search'></i>
-
-                <input
-                    type="text"
-                    id="searchInput"
-                    placeholder="Tìm sản phẩm..."
+                <button
+                    class="category-btn active"
+                    onclick="filterCategory('all',this)"
                 >
+                    <i class="ri-apps-line"></i>
+                    Tất cả
+                </button>
+
+                <?php foreach($categories as $category): ?>
+
+                    <button
+                        class="category-btn"
+                        onclick="filterCategory(
+                            '<?= $category['id'] ?>',
+                            this
+                        )"
+                    >
+                        <i class="ri-price-tag-3-line"></i>
+                        <?= htmlspecialchars($category['name']) ?>
+                    </button>
+
+                <?php endforeach; ?>
 
             </div>
 
@@ -520,6 +630,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div 
                     class="product-card product-item"
                     data-name="<?= strtolower($product['name']) ?>"
+                    data-category="<?= $product['category_id'] ?>"
                 >
 
                     <div class="product-image">
@@ -535,7 +646,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="product-category">
 
-                            <i class='bx bx-category'></i>
+                            <i class="ri-price-tag-3-line"></i>
 
                             <?= htmlspecialchars($product['category_name']) ?>
 
@@ -563,7 +674,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             )'
                         >
 
-                            <i class='bx bx-plus'></i>
+                            <i class="ri-add-line"></i>
                             Thêm vào bill
 
                         </button>
@@ -581,7 +692,16 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="pos-cart">
 
         <h2 class="cart-title">
-            Bill hiện tại
+
+            <span>
+                <i class="ri-shopping-cart-2-line"></i>
+                Bill hiện tại
+            </span>
+
+            <span class="cart-badge" id="cartBadge">
+                0
+            </span>
+
         </h2>
 
         <div class="cart-list" id="cartList">
@@ -632,7 +752,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     class="checkout-btn"
                 >
 
-                    <i class='bx bx-printer'></i>
+                    <i class="ri-printer-line"></i>
                     Tạo bill & In hóa đơn
 
                 </button>
@@ -671,6 +791,37 @@ function addToCart(id,name,price,image){
     renderCart();
 }
 
+function filterCategory(categoryId,button){
+
+    const buttons =
+        document.querySelectorAll('.category-btn');
+
+    buttons.forEach(btn=>{
+
+        btn.classList.remove('active');
+    });
+
+    button.classList.add('active');
+
+    const items =
+        document.querySelectorAll('.product-item');
+
+    items.forEach(item=>{
+
+        if(
+            categoryId == 'all' ||
+            item.dataset.category == categoryId
+        ){
+
+            item.style.display = 'block';
+
+        }else{
+
+            item.style.display = 'none';
+        }
+    });
+}
+
 function renderCart(){
 
     const cartList = document.getElementById('cartList');
@@ -678,6 +829,8 @@ function renderCart(){
     const totalPrice = document.getElementById('totalPrice');
 
     const cartData = document.getElementById('cartData');
+
+    const cartBadge = document.getElementById('cartBadge');
 
     if(cart.length <= 0){
 
@@ -688,6 +841,8 @@ function renderCart(){
         `;
 
         totalPrice.innerHTML = '0đ';
+
+        cartBadge.innerHTML = 0;
 
         return;
     }
@@ -753,7 +908,7 @@ function renderCart(){
                     onclick="removeItem(${index})"
                 >
 
-                    <i class='bx bx-trash'></i>
+                    <i class="ri-delete-bin-6-line"></i>
 
                 </button>
 
@@ -767,6 +922,8 @@ function renderCart(){
     totalPrice.innerHTML = formatMoney(total)+'đ';
 
     cartData.value = JSON.stringify(cart);
+
+    cartBadge.innerHTML = cart.length;
 
     calculateChange();
 }
@@ -855,4 +1012,4 @@ document
 });
 
 </script>
-
+```
