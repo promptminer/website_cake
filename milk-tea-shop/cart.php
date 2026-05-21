@@ -584,11 +584,10 @@ body{
     inset:0;
     background:rgba(0,0,0,.45);
     display:none;
-    align-items:center;
+    align-items:flex-end;
     justify-content:center;
     z-index:999;
     backdrop-filter:blur(3px);
-    padding:20px;
 }
 
 .modal.active{
@@ -599,7 +598,7 @@ body{
     width:100%;
     max-width:540px;
     background:#fff;
-    border-radius:28px 28px 28px 28px;
+    border-radius:28px 28px 0 0;
     padding:28px 24px 34px;
     animation:slideUp .25s ease;
 }

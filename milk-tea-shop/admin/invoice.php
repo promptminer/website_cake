@@ -1,7 +1,5 @@
-<!-- # invoice.php (đã tối ưu in bill K80 - bỏ ảnh + bỏ phí ship)
-
-```php -->
 <?php
+
 require_once "../core/auth.php";
 require_once "../core/db.php";
 
@@ -12,8 +10,14 @@ if(!isset($_GET['id'])){
 
 $orderId = (int)$_GET['id'];
 
-$stmt = $pdo->prepare("SELECT * FROM orders WHERE id = ?");
+$stmt = $pdo->prepare("
+    SELECT *
+    FROM orders
+    WHERE id = ?
+");
+
 $stmt->execute([$orderId]);
+
 $order = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if(!$order){
@@ -35,15 +39,18 @@ $detailStmt = $pdo->prepare("
 ");
 
 $detailStmt->execute([$orderId]);
+
 $orderItems = $detailStmt->fetchAll(PDO::FETCH_ASSOC);
 
 $productTotal = 0;
 
 foreach($orderItems as $item){
+
     $productTotal += (
         $item['price'] *
         $item['quantity']
     );
+
 }
 
 $finalTotal = $productTotal;
@@ -54,10 +61,12 @@ $statusLabels = [
     'delivered' => 'Đã giao',
     'cancelled' => 'Đã hủy'
 ];
+
 ?>
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
 
 <meta charset="UTF-8">
@@ -77,14 +86,59 @@ $statusLabels = [
 }
 
 body{
-    background:#f5f5f5;
+    background:#f3f4f6;
     padding:20px;
 }
+
+/* ACTION BUTTONS */
+
+.top-actions{
+    width:80mm;
+    margin:0 auto 14px;
+    display:flex;
+    gap:10px;
+}
+
+.back-btn,
+.print-btn{
+    flex:1;
+    border:none;
+    border-radius:10px;
+    padding:12px;
+    font-size:14px;
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.back-btn{
+    background:#e5e7eb;
+    color:#111827;
+}
+
+.back-btn:hover{
+    background:#d1d5db;
+}
+
+.print-btn{
+    background:#111827;
+    color:white;
+}
+
+.print-btn:hover{
+    opacity:.9;
+}
+
+/* BILL */
 
 .invoice-wrap{
     width:80mm;
     margin:auto;
-    background:#fff;
+    background:white;
     padding:12px;
     color:#000;
 }
@@ -101,6 +155,7 @@ body{
 
 .shop-name p{
     font-size:12px;
+    line-height:1.5;
 }
 
 .bill-title{
@@ -113,7 +168,7 @@ body{
 .info{
     font-size:12px;
     margin-bottom:10px;
-    line-height:1.6;
+    line-height:1.7;
 }
 
 .info div{
@@ -134,31 +189,35 @@ thead{
 th,
 td{
     padding:6px 0;
-    text-align:left;
     vertical-align:top;
+}
+
+th{
+    font-weight:bold;
 }
 
 .qty,
 .price,
 .total{
     text-align:right;
+    white-space:nowrap;
 }
 
 .summary{
     margin-top:10px;
     border-top:1px dashed #000;
     padding-top:10px;
-    font-size:13px;
 }
 
 .summary-row{
     display:flex;
     justify-content:space-between;
     margin-bottom:6px;
+    font-size:13px;
 }
 
 .final{
-    font-size:15px;
+    font-size:16px;
     font-weight:bold;
 }
 
@@ -166,30 +225,19 @@ td{
     text-align:center;
     margin-top:16px;
     font-size:12px;
-    line-height:1.6;
+    line-height:1.7;
 }
 
-.print-btn{
-    display:block;
-    width:80mm;
-    margin:15px auto;
-    border:none;
-    background:#111;
-    color:#fff;
-    padding:12px;
-    cursor:pointer;
-    border-radius:8px;
-    font-size:14px;
-}
+/* PRINT */
 
 @media print{
 
     body{
-        background:#fff;
+        background:white;
         padding:0;
     }
 
-    .print-btn{
+    .top-actions{
         display:none;
     }
 
@@ -197,11 +245,12 @@ td{
         width:80mm;
         padding:0;
         margin:0;
+        box-shadow:none;
     }
 
     @page{
         size:80mm auto;
-        margin:5mm;
+        margin:4mm;
     }
 
 }
@@ -209,19 +258,33 @@ td{
 </style>
 
 </head>
+
 <body>
 
-<button onclick="window.print()" class="print-btn">
-    <i class='bx bx-printer'></i>
-    In hóa đơn
-</button>
+<div class="top-actions">
+
+    <a href="index.php?page=orders" class="back-btn">
+        <i class='bx bx-arrow-back'></i>
+        Quay về
+    </a>
+
+    <button onclick="window.print()" class="print-btn">
+        <i class='bx bx-printer'></i>
+        In hóa đơn
+    </button>
+
+</div>
 
 <div class="invoice-wrap">
 
     <div class="shop-name">
+
         <h1>ARPINA</h1>
+
         <p>Hotline: 0819.180.009</p>
-        <p>Cảm ơn quý khách</p>
+
+        <p>Cảm ơn quý khách ❤️</p>
+
     </div>
 
     <div class="bill-title">
@@ -232,7 +295,7 @@ td{
 
         <div>
             <strong>Mã đơn:</strong>
-            #<?= str_pad($order['id'],3,'0',STR_PAD_LEFT) ?>
+            #<?= str_pad($order['id'], 3, '0', STR_PAD_LEFT) ?>
         </div>
 
         <div>
@@ -265,12 +328,19 @@ td{
     <table>
 
         <thead>
+
             <tr>
+
                 <th>Sản phẩm</th>
+
                 <th class="qty">SL</th>
+
                 <th class="price">Giá</th>
+
                 <th class="total">TT</th>
+
             </tr>
+
         </thead>
 
         <tbody>
@@ -292,7 +362,7 @@ td{
                 </td>
 
                 <td class="total">
-                    <?= number_format($item['price'] * $item['quantity']) ?>
+                    <?= number_format($item['price'] * $item['quantity']) ?>đ
                 </td>
 
             </tr>
@@ -306,29 +376,26 @@ td{
     <div class="summary">
 
         <div class="summary-row final">
+
             <span>TỔNG</span>
-            <span><?= number_format($finalTotal) ?>đ</span>
+
+            <span>
+                <?= number_format($finalTotal) ?>đ
+            </span>
+
         </div>
 
     </div>
 
     <div class="footer">
+
         <p>Thanh toán COD</p>
+
         <p>Hẹn gặp lại quý khách ❤️</p>
+
     </div>
 
 </div>
 
 </body>
 </html>
-<!-- ```
-
-Các thay đổi chính:
-
-* Khổ in chuẩn K80.
-* Xóa hoàn toàn ảnh sản phẩm.
-* Xóa phí vận chuyển.
-* Layout tối giản để máy POS nhiệt in đẹp.
-* Tự căn khổ khi `window.print()`.
-* Font và spacing tối ưu cho bill nhiệt.
-* Giữ nguyên logic lấy đơn hàng. -->
