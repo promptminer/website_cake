@@ -1,9 +1,12 @@
+<<<<<<< HEAD
 ```php
 <link
     href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
     rel="stylesheet"
 />
 
+=======
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
 <?php
 
 require_once "../core/auth.php";
@@ -47,6 +50,15 @@ if(isset($_POST['create_pos_order'])){
 
                 $pdo->beginTransaction();
 
+<<<<<<< HEAD
+=======
+                /*
+                |--------------------------------------------------------------------------
+                | INSERT ORDER
+                |--------------------------------------------------------------------------
+                */
+
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
                 $insertOrder = $pdo->prepare("
                     INSERT INTO orders(
                         customer_name,
@@ -77,6 +89,15 @@ if(isset($_POST['create_pos_order'])){
 
                 $orderId = $pdo->lastInsertId();
 
+<<<<<<< HEAD
+=======
+                /*
+                |--------------------------------------------------------------------------
+                | INSERT ORDER DETAILS
+                |--------------------------------------------------------------------------
+                */
+
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
                 $insertDetail = $pdo->prepare("
                     INSERT INTO order_details(
                         order_id,
@@ -109,7 +130,10 @@ if(isset($_POST['create_pos_order'])){
                         window.location.href='invoice.php?id=".$orderId."';
                     </script>
                 ";
+<<<<<<< HEAD
 
+=======
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
                 exit;
 
             }catch(Exception $e){
@@ -128,6 +152,7 @@ if(isset($_POST['create_pos_order'])){
 
 /*
 |--------------------------------------------------------------------------
+<<<<<<< HEAD
 | GET CATEGORIES
 |--------------------------------------------------------------------------
 */
@@ -141,6 +166,8 @@ $categories = $cateStmt->fetchAll(PDO::FETCH_ASSOC);
 
 /*
 |--------------------------------------------------------------------------
+=======
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
 | GET PRODUCTS
 |--------------------------------------------------------------------------
 */
@@ -161,10 +188,13 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <style>
 
+<<<<<<< HEAD
 body{
     background:#f5f7fb;
 }
 
+=======
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
 .pos-page{
     display:flex;
     gap:24px;
@@ -183,6 +213,7 @@ body{
     box-shadow:0 4px 20px rgba(0,0,0,0.05);
     position:sticky;
     top:20px;
+<<<<<<< HEAD
     backdrop-filter:blur(10px);
 }
 
@@ -191,6 +222,11 @@ body{
 }
 
 .top-header{
+=======
+}
+
+.pos-header{
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -199,13 +235,21 @@ body{
     flex-wrap:wrap;
 }
 
+<<<<<<< HEAD
 .top-header h1{
+=======
+.pos-header h1{
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
     font-size:30px;
     font-weight:700;
     color:#111827;
 }
 
+<<<<<<< HEAD
 .top-header p{
+=======
+.pos-header p{
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
     margin-top:6px;
     color:#6b7280;
 }
@@ -236,6 +280,7 @@ body{
     outline:none;
 }
 
+<<<<<<< HEAD
 .category-filter{
     display:flex;
     gap:12px;
@@ -267,6 +312,8 @@ body{
     color:#fff;
 }
 
+=======
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
 .product-grid{
     display:grid;
     grid-template-columns:repeat(3,1fr);
@@ -274,11 +321,17 @@ body{
 }
 
 .product-card{
+<<<<<<< HEAD
     position:relative;
     background:#fff;
     border-radius:22px;
     overflow:hidden;
     border:1px solid #f3f4f6;
+=======
+    background:#fff;
+    border-radius:22px;
+    overflow:hidden;
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
     box-shadow:0 4px 18px rgba(0,0,0,0.05);
     transition:0.25s;
 }
@@ -298,11 +351,14 @@ body{
     width:100%;
     height:100%;
     object-fit:cover;
+<<<<<<< HEAD
     transition:0.35s;
 }
 
 .product-card:hover .product-image img{
     transform:scale(1.06);
+=======
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
 }
 
 .product-body{
@@ -340,11 +396,15 @@ body{
     height:50px;
     border:none;
     border-radius:14px;
+<<<<<<< HEAD
     background:linear-gradient(
         135deg,
         #111827,
         #1f2937
     );
+=======
+    background:#111827;
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
     color:#fff;
     font-size:15px;
     font-weight:600;
@@ -357,14 +417,18 @@ body{
 }
 
 .cart-title{
+<<<<<<< HEAD
     display:flex;
     align-items:center;
     justify-content:space-between;
+=======
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
     font-size:22px;
     font-weight:700;
     margin-bottom:22px;
 }
 
+<<<<<<< HEAD
 .cart-badge{
     background:#f59e0b;
     color:#fff;
@@ -377,6 +441,8 @@ body{
     font-size:13px;
 }
 
+=======
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
 .cart-list{
     display:flex;
     flex-direction:column;
@@ -488,11 +554,15 @@ body{
     height:56px;
     border:none;
     border-radius:16px;
+<<<<<<< HEAD
     background:linear-gradient(
         135deg,
         #f59e0b,
         #ea580c
     );
+=======
+    background:#f59e0b;
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
     color:#fff;
     font-size:16px;
     font-weight:700;
@@ -546,7 +616,11 @@ body{
         font-size:18px;
     }
 
+<<<<<<< HEAD
     .top-header{
+=======
+    .pos-header{
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
         flex-direction:column;
         align-items:stretch;
     }
@@ -565,6 +639,7 @@ body{
 
         <div class="pos-header">
 
+<<<<<<< HEAD
             <div class="top-header">
 
                 <div>
@@ -618,6 +693,29 @@ body{
                     </button>
 
                 <?php endforeach; ?>
+=======
+            <div>
+
+                <h1>
+                    Bán tại quầy
+                </h1>
+
+                <p>
+                    Tạo bill nhanh cho khách mua trực tiếp
+                </p>
+
+            </div>
+
+            <div class="pos-search">
+
+                <i class='bx bx-search'></i>
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Tìm sản phẩm..."
+                >
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
 
             </div>
 
@@ -630,7 +728,10 @@ body{
                 <div 
                     class="product-card product-item"
                     data-name="<?= strtolower($product['name']) ?>"
+<<<<<<< HEAD
                     data-category="<?= $product['category_id'] ?>"
+=======
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
                 >
 
                     <div class="product-image">
@@ -646,7 +747,11 @@ body{
 
                         <div class="product-category">
 
+<<<<<<< HEAD
                             <i class="ri-price-tag-3-line"></i>
+=======
+                            <i class='bx bx-category'></i>
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
 
                             <?= htmlspecialchars($product['category_name']) ?>
 
@@ -674,7 +779,11 @@ body{
                             )'
                         >
 
+<<<<<<< HEAD
                             <i class="ri-add-line"></i>
+=======
+                            <i class='bx bx-plus'></i>
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
                             Thêm vào bill
 
                         </button>
@@ -692,6 +801,7 @@ body{
     <div class="pos-cart">
 
         <h2 class="cart-title">
+<<<<<<< HEAD
 
             <span>
                 <i class="ri-shopping-cart-2-line"></i>
@@ -702,6 +812,9 @@ body{
                 0
             </span>
 
+=======
+            Bill hiện tại
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
         </h2>
 
         <div class="cart-list" id="cartList">
@@ -752,7 +865,11 @@ body{
                     class="checkout-btn"
                 >
 
+<<<<<<< HEAD
                     <i class="ri-printer-line"></i>
+=======
+                    <i class='bx bx-printer'></i>
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
                     Tạo bill & In hóa đơn
 
                 </button>
@@ -791,6 +908,7 @@ function addToCart(id,name,price,image){
     renderCart();
 }
 
+<<<<<<< HEAD
 function filterCategory(categoryId,button){
 
     const buttons =
@@ -822,6 +940,8 @@ function filterCategory(categoryId,button){
     });
 }
 
+=======
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
 function renderCart(){
 
     const cartList = document.getElementById('cartList');
@@ -830,8 +950,11 @@ function renderCart(){
 
     const cartData = document.getElementById('cartData');
 
+<<<<<<< HEAD
     const cartBadge = document.getElementById('cartBadge');
 
+=======
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
     if(cart.length <= 0){
 
         cartList.innerHTML = `
@@ -842,8 +965,11 @@ function renderCart(){
 
         totalPrice.innerHTML = '0đ';
 
+<<<<<<< HEAD
         cartBadge.innerHTML = 0;
 
+=======
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
         return;
     }
 
@@ -908,7 +1034,11 @@ function renderCart(){
                     onclick="removeItem(${index})"
                 >
 
+<<<<<<< HEAD
                     <i class="ri-delete-bin-6-line"></i>
+=======
+                    <i class='bx bx-trash'></i>
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
 
                 </button>
 
@@ -923,8 +1053,11 @@ function renderCart(){
 
     cartData.value = JSON.stringify(cart);
 
+<<<<<<< HEAD
     cartBadge.innerHTML = cart.length;
 
+=======
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
     calculateChange();
 }
 
@@ -1012,4 +1145,8 @@ document
 });
 
 </script>
+<<<<<<< HEAD
 ```
+=======
+
+>>>>>>> c90e6903b7fe74abb7d638ea2af63de6dfb3df6a
