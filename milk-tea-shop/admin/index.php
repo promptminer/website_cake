@@ -848,7 +848,7 @@ try {
 
                         </div>
 
-                        <!-- <div class="dashboard-card">
+                        <div class="dashboard-card">
 
                             <div class="card-top">
                                 <h3>Khuyến mãi</h3>
@@ -857,7 +857,7 @@ try {
 
                             <p><?= $totalPromotions ?></p>
 
-                        </div> -->
+                        </div>
 
                         <div class="dashboard-card">
 
